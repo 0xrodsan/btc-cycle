@@ -362,10 +362,17 @@
     renderRealizedPrice(rpValue, btcPrice);
     renderMvrv(zScore);
 
-    // Freshness
-    var rpDate   = rpRaw.date || (rpRaw.data && rpRaw.data.date) || null;
-    var mvrvDate = mvrvRaw.date || (mvrvRaw.data && mvrvRaw.data.date) || null;
-    renderFreshness(rpDate, mvrvDate);
+    // Freshness — handle BGeometrics array format (last entry has "d" field)
+    function extractDate(raw) {
+      if (!raw) return null;
+      // Array: take last element
+      var obj = Array.isArray(raw) ? raw[raw.length - 1] : raw;
+      if (!obj) return null;
+      // Try "d" (BGeometrics), then "date", then nested data.date
+      return obj.d || obj.date || (obj.data && (obj.data.d || obj.data.date)) || null;
+    }
+
+    renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));
 
   }).catch(function (err) {
     console.error("[btc-cycle] failed to load metrics:", err);
