@@ -1,0 +1,47 @@
+name: Fetch Daily Metrics
+
+on:
+  schedule:
+    - cron: "30 0 * * *"   # daily at 00:30 UTC
+  workflow_dispatch:         # manual trigger
+
+jobs:
+  fetch:
+    name: Fetch and commit metrics
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Realized Price
+        run: |
+          curl -sf \
+            "https://api.bgeometrics.com/v1/realized-price?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            -o data/realized-price.json
+
+      - name: Fetch MVRV Z-Score
+        run: |
+          curl -sf \
+            "https://api.bgeometrics.com/v1/mvrv-zscore?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            -o data/mvrv-zscore.json
+
+      - name: Fetch BTC Spot Price (CoinGecko)
+        run: |
+          curl -sf \
+            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd" \
+            -o data/btc-price.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json
+          if git diff --quiet HEAD; then
+            echo "No changes to commit."
+          else
+            git commit -m "data: daily metrics update [skip ci]"
+            git push
+          fi
