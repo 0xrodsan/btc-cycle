@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTC Cycle | Blackbox</title>
+  <meta name="description" content="Sinais on-chain para holders de longo prazo — versão em português em breve.">
+
+  <link rel="alternate" hreflang="pt-BR" href="https://0xrodsan.github.io/btc-cycle/pt/">
+  <link rel="alternate" hreflang="en" href="https://0xrodsan.github.io/btc-cycle/">
+  <link rel="alternate" hreflang="x-default" href="https://0xrodsan.github.io/btc-cycle/">
+  <link rel="canonical" href="https://0xrodsan.github.io/btc-cycle/pt/">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../style.css">
+
+  <!-- Prevent flash of wrong theme -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem("theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", stored || (prefersDark ? "dark" : "light"));
+    })();
+  </script>
+
+  <script src="../config.js"></script>
+</head>
+<body>
+
+  <!-- ============================================================
+       Header
+       ============================================================ -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="https://0xrodsan.github.io/" class="site-logo">RodSan</a>
+
+      <nav class="site-nav" aria-label="Navegação principal">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="https://0xrodsan.github.io/blackbox/" class="nav-link">Caixa Preta</a></li>
+          <li class="nav-item"><a href="https://0xrodsan.github.io/contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" class="theme-toggle" aria-label="Alternar tema claro/escuro" title="Alternar tema">
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <a href="https://0xrodsan.github.io/btc-cycle/" class="lang-flag" aria-label="English" title="English">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" width="24" height="16" aria-hidden="true">
+            <clipPath id="a"><path d="M0 0v30h60V0z"/></clipPath>
+            <clipPath id="b"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath>
+            <g clip-path="url(#a)">
+              <path d="M0 0v30h60V0z" fill="#012169"/>
+              <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/>
+              <path d="M0 0l60 30m0-30L0 30" clip-path="url(#b)" stroke="#C8102E" stroke-width="4"/>
+              <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+              <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>
+            </g>
+          </svg>
+        </a>
+
+        <button type="button" class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Navegação móvel" hidden>
+      <ul class="mobile-nav-list">
+        <li class="mobile-nav-item"><a href="https://0xrodsan.github.io/blackbox/" class="mobile-nav-link">Caixa Preta</a></li>
+        <li class="mobile-nav-item"><a href="https://0xrodsan.github.io/contato.html" class="mobile-nav-link">Contato</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ============================================================
+       Main
+       ============================================================ -->
+  <main class="main-content">
+
+    <!-- Hero -->
+    <section class="hero reveal" aria-labelledby="hero-title">
+      <h1 id="hero-title" class="hero-title">BTC Cycle</h1>
+      <p class="hero-subtitle">Em breve em português.</p>
+    </section>
+
+    <!-- Placeholder -->
+    <section class="metrics-section" aria-label="Aviso de idioma">
+      <div class="metric-block reveal" style="text-align: center; padding: 3rem 0;">
+        <p style="color: var(--color-text-muted); line-height: 1.8; margin-bottom: 1.5rem;">
+          Esta ferramenta está disponível apenas em inglês no momento.<br>
+          A versão em português está a caminho.
+        </p>
+        <a href="https://0xrodsan.github.io/btc-cycle/" style="font-size: 0.9rem; font-weight: 500; color: var(--color-text);">
+          → Ver versão em inglês
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       Footer
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">© <span class="footer-year">2025</span> RodSan</p>
+      <ul class="footer-social">
+        <li>
+          <a href="https://x.com/0xRodSan" class="footer-social-link" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="../main.js" defer></script>
+</body>
+</html>
