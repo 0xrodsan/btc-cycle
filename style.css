@@ -613,13 +613,13 @@ svg {
   position: absolute;
   z-index: 200;
   background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 12px 16px;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  padding: 14px 16px;
   max-width: 300px;
   font-size: 0.82rem;
-  line-height: 1.5;
-  color: #ccc;
+  line-height: 1.55;
+  color: #c8c8c8;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -629,15 +629,39 @@ svg {
   opacity: 1;
 }
 
+.tooltip-box p {
+  margin: 0;
+}
+
 .tooltip-zone-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .tooltip-zone-row:last-child {
   margin-bottom: 0;
+}
+
+.tooltip-zone-row div {
+  flex: 1;
+  min-width: 0;
+}
+
+.tooltip-zone-row strong {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ececea;
+  margin-bottom: 2px;
+}
+
+.tooltip-zone-row p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #8a8a86;
+  line-height: 1.5;
 }
 
 .tooltip-zone-dot {
@@ -645,19 +669,19 @@ svg {
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 /* ============================================================
-   Zone color system — solid fills for tooltip dots
-   These classes are used by .tooltip-zone-dot and can be
-   reused anywhere a solid zone color is needed.
+   Zone dot colors — solid fills for tooltip glossary dots.
+   Named with zone-dot- prefix to avoid collision with
+   zone-badge-- classes which use CSS variable-based colours.
    ============================================================ */
-.zone-green      { background-color: #1a9e5c; }
-.zone-soft-green { background-color: #2d7a4f; }
-.zone-neutral    { background-color: #4a4a4a; }
-.zone-amber      { background-color: #b07d2a; }
-.zone-red        { background-color: #9e2a2a; }
+.zone-dot-green      { background-color: #4ade80; }
+.zone-dot-soft-green { background-color: #86efac; }
+.zone-dot-neutral    { background-color: #9ca3af; }
+.zone-dot-amber      { background-color: #fbbf24; }
+.zone-dot-red        { background-color: #f87171; }
 
 /* ============================================================
    Responsive — tablet & up
