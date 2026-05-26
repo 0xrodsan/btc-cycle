@@ -155,7 +155,7 @@
     {
       test: function (prem) { return prem >= 0 && prem < 25; },
       label: "Accumulation",
-      color: "soft-green",
+      color: "blue",
       copy: "BTC is slightly above aggregate cost basis. Long-term holders are generally in modest profit."
     },
     {

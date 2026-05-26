@@ -48,7 +48,7 @@ const TOOLTIPS = {
       },
       {
         name: "Accumulation",
-        color: "soft-green",
+        color: "blue",
         description: "Market is modestly above average cost basis. A historically favorable zone for long-term entry."
       },
       {

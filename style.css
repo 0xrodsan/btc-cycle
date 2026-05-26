@@ -446,7 +446,7 @@ svg {
 
 /* Premium color matches zone */
 .color-green       { color: var(--zone-green-text); }
-.color-soft-green  { color: var(--zone-soft-green-text); }
+.color-blue        { color: #5a9fd4; }
 .color-neutral     { color: var(--zone-neutral-text); }
 .color-amber       { color: var(--zone-amber-text); }
 .color-red         { color: var(--zone-red-text); }
@@ -480,10 +480,10 @@ svg {
   border-color: var(--zone-green-border);
 }
 
-.zone-badge--soft-green {
-  background-color: var(--zone-soft-green-bg);
-  color: var(--zone-soft-green-text);
-  border-color: var(--zone-soft-green-border);
+.zone-badge--blue {
+  background-color: rgba(42, 109, 181, 0.15);
+  color: #5a9fd4;
+  border: 1px solid rgba(42, 109, 181, 0.3);
 }
 
 .zone-badge--neutral {
@@ -678,7 +678,7 @@ svg {
    zone-badge-- classes which use CSS variable-based colours.
    ============================================================ */
 .zone-dot-green      { background-color: #4ade80; }
-.zone-dot-soft-green { background-color: #86efac; }
+.tooltip-zone-dot.zone-dot-blue { background-color: #2a6db5; }
 .zone-dot-neutral    { background-color: #9ca3af; }
 .zone-dot-amber      { background-color: #fbbf24; }
 .zone-dot-red        { background-color: #f87171; }
