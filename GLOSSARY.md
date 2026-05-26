@@ -137,7 +137,83 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 
 ## Iteration 2 — Cohort dynamics
 
-*To be filled when Iteration 2 begins. Planned entries: HODL Waves, LTH/STH supply, Liveliness, Exchange Net Position Change.*
+### Long-Term Holder (LTH)
+
+**Plain language**: Any Bitcoin owner whose coins have not moved for 155 days or more. This threshold is not arbitrary — statistically, after 155 days without moving, the probability of a coin being spent drops sharply. Holding that long signals intentional accumulation, not speculation.
+
+**Technical**: A UTXO is classified as LTH when its age crosses 155 days. The counterpart is STH (Short-Term Holder) — any UTXO younger than 155 days.
+
+**Why it matters**: LTHs are the "smart money" in on-chain analysis. They tend to accumulate during bear markets and distribute during bull markets. Tracking their behavior is the closest thing on-chain analysis has to following institutional intent.
+
+---
+
+### LTH Supply (Long-Term Holder Supply)
+
+**Plain language**: The total amount of Bitcoin held by Long-Term Holders at any given moment. When this number rises, patient capital is accumulating. When it falls, those same holders are selling into strength.
+
+**Technical**: Sum of all UTXOs with age ≥ 155 days, expressed in BTC.
+
+**Why it matters**:
+- LTH Supply rising during a price downtrend → weak hands selling to strong hands → accumulation signal
+- LTH Supply falling during a price uptrend → LTHs distributing into demand → distribution signal
+- LTH Supply at all-time highs while price is depressed → historically one of the strongest accumulation signals in Bitcoin
+
+**The pattern to look for**: price down + LTH Supply up = smart money buying what scared money is selling.
+
+**Data source note**: LTH Supply total (in BTC) is not available on BGeometrics free tier. The metric used in `btc-cycle` Iteration 2 is **LTH Position Change 30d** — the net change in LTH supply over 30 days. This is more actionable (shows current accumulation/distribution direction) but does not show the absolute total. If the full supply metric is needed in the future, Glassnode (paid) or CoinMetrics (free tier) are the available sources.
+
+---
+
+### LTH Position Change 30d
+
+**Plain language**: How much Bitcoin moved into or out of Long-Term Holder wallets in the last 30 days. A positive number means more BTC crossed the 155-day threshold (accumulation). A negative number means LTHs are spending and distributing.
+
+**Technical**: Net change in LTH Supply over a rolling 30-day window, expressed in BTC.
+- Positive → LTH Supply growing → accumulation in progress
+- Negative → LTH Supply shrinking → distribution in progress
+- Near zero → neutral, no strong directional signal
+
+**Why it matters**: More dynamic than the static supply total — shows whether accumulation is happening *right now*, not just the historical stock. A sustained positive reading while price is low is one of the clearest smart-money signals available on-chain.
+
+**Used in `btc-cycle`**: Yes — Iteration 2. Replaces LTH Supply total due to data availability constraints on BGeometrics free tier.
+
+---
+
+### Short-Term Holder (STH)
+
+**Plain language**: Any Bitcoin owner whose coins have moved within the last 155 days. STHs are more reactive to price — they tend to sell during downturns and buy during uptrends, often at the wrong time.
+
+**Technical**: A UTXO is classified as STH when its age is below 155 days.
+
+**Why it matters**: STH behavior is the "noise" that LTH analysis filters out. When STHs capitulate (sell at a loss during bear markets), they transfer coins to LTHs — this is exactly the dynamic that drives LTH Supply higher at cycle bottoms.
+
+---
+
+### Exchange Net Position Change
+
+**Plain language**: A measure of how much Bitcoin is flowing into or out of exchanges over a given period (typically 30 days). Coins entering exchanges are likely being prepared for sale. Coins leaving exchanges are going to cold storage — a sign of conviction holding.
+
+**Technical**: `Exchange Net Position Change = BTC inflows to exchanges − BTC outflows from exchanges` over a rolling window (30 days standard).
+- Positive value → net inflow → more BTC available for sale → bearish pressure
+- Negative value → net outflow → BTC leaving exchanges → bullish pressure
+
+**Why it matters**: Exchange reserves represent the immediately available supply for selling. When reserves fall consistently while price is low, it means large players are accumulating and moving coins off exchanges — reducing future sell pressure before any price recovery is visible.
+
+**The pattern to look for**: sustained net outflows + low price + LTH Supply rising = three-signal confluence that historically precedes major recoveries.
+
+**How exchanges are identified on-chain**: blockchain analytics firms (Glassnode, Arkham, Nansen) use address clustering — grouping addresses that transact together and matching deposit/withdrawal patterns to known exchange addresses. This is why entity-adjusted data is more reliable than raw address data.
+
+---
+
+### HODL Waves
+
+**Plain language**: A visualization that shows what percentage of Bitcoin's total supply was last moved in each time band (1 day ago, 1 week ago, 1 month ago, 6 months ago, 1 year ago, etc.). When the "old" bands (1+ years) grow wider, long-term holding is increasing. When the "young" bands dominate, coins are changing hands frequently.
+
+**Technical**: Each UTXO is assigned to an age band based on its last move. The supply is then distributed across these bands and shown as a stacked area chart over time.
+
+**Why it matters**: HODL Waves make LTH behavior visible at a macro level. The growth of the 1-year+ bands in a bear market is the visual representation of accumulation — coins being absorbed by holders who intend to wait for the next cycle.
+
+🚧 *Visual metric — more useful as context for LTH Supply than as a standalone signal in `btc-cycle`.*
 
 ---
 
@@ -165,4 +241,4 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 
 - [ ] How exactly is the StdDev window calculated in MVRV Z-Score? Full history or rolling?
 - [ ] Does BGeometrics expose entity-adjusted metrics, or only raw address-level data?
-- [ ] At what age threshold does a UTXO transition from "Short-Term Holder" to "Long-Term Holder"? (commonly cited as 155 days — to verify)
+- [x] At what age threshold does a UTXO transition from "Short-Term Holder" to "Long-Term Holder"? → **155 days** (confirmed in Iteration 2)
