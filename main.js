@@ -413,7 +413,7 @@
   document.addEventListener("scroll", hideTooltip, { passive: true });
   window.addEventListener("resize",   hideTooltip);
 
-  function attachAllTooltips() {
+  function attachAllTooltips(zScore) {
     if (typeof TOOLTIPS === "undefined") return;
 
     // Title links — navigation + tooltip on hover
@@ -433,9 +433,16 @@
     var rpPremEl   = document.getElementById("rp-premium");
     if (rpPremEl)   attachTooltip(rpPremEl,   TOOLTIPS.premiumDiscount.text);
 
-    // MVRV Z-Score value — static text; commit 2 upgrades to dynamic
+    // MVRV Z-Score value — dynamic text based on live value
     var mvrvValueEl = document.getElementById("mvrv-value");
-    if (mvrvValueEl) attachTooltip(mvrvValueEl, TOOLTIPS.mvrvZScoreValue.text);
+    if (mvrvValueEl) {
+      var mvrvZoneLabel = getMvrvZone(zScore).label;
+      var mvrvValueText = "A Z-Score of " + zScore.toFixed(2)
+        + " places the market in the " + mvrvZoneLabel
+        + " zone. Values above 5 have historically coincided with cycle tops;"
+        + " below 0.1 with generational lows.";
+      attachTooltip(mvrvValueEl, mvrvValueText);
+    }
 
     // Zone badges — full zone glossary
     var rpBadgeEl   = document.getElementById("rp-zone-badge");
@@ -496,7 +503,7 @@
     renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));
 
     // Attach tooltips after data has rendered
-    attachAllTooltips();
+    attachAllTooltips(zScore);
 
   }).catch(function (err) {
     console.error("[btc-cycle] failed to load metrics:", err);

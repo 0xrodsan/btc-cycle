@@ -81,10 +81,10 @@ const TOOLTIPS = {
 
   // MVRV Z-Score interpretations
   mvrvInterpretation: {
-    "Deep Accumulation": "Historically, this is where patient capital accumulates. Major cycle lows have occurred at this level.",
-    "Fair Value":        "No extreme signal. The market is near its historical equilibrium — neither cheap nor expensive.",
-    "Caution":           "The market is running above historical norms. Long-term holders are in significant profit — watch for distribution.",
-    "Distribution":      "Historically, this zone has marked cycle peaks. Patient capital tends to reduce exposure here."
+    "Deep Accumulation": "Z-Score in historically rare territory. Every major cycle low has occurred at this level.",
+    "Fair Value":        "Z-Score within normal statistical range. No cycle peak or bottom has occurred at this level.",
+    "Caution":           "Z-Score is stretching above historical norms. Elevated unrealized profit across the market.",
+    "Distribution":      "Z-Score at historically extreme levels. Every prior cycle peak occurred in or near this zone."
   }
 
 };
