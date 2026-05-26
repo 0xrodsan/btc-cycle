@@ -304,7 +304,13 @@
       badgeEl.className = "zone-badge zone-badge--" + zone.color;
     }
 
-    setTextSafe("rp-interpretation", zone.copy);
+    // Interpretation: use TOOLTIPS if available, fall back to zone.copy
+    var rpInterp = (typeof TOOLTIPS !== "undefined" &&
+                    TOOLTIPS.realizedPriceInterpretation &&
+                    TOOLTIPS.realizedPriceInterpretation[zone.label])
+      ? TOOLTIPS.realizedPriceInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe("rp-interpretation", rpInterp);
   }
 
   /* ============================================================
@@ -321,7 +327,94 @@
       badgeEl.className = "zone-badge zone-badge--" + zone.color;
     }
 
-    setTextSafe("mvrv-interpretation", zone.copy);
+    // Interpretation: use TOOLTIPS if available, fall back to zone.copy
+    var mvrvInterp = (typeof TOOLTIPS !== "undefined" &&
+                      TOOLTIPS.mvrvInterpretation &&
+                      TOOLTIPS.mvrvInterpretation[zone.label])
+      ? TOOLTIPS.mvrvInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe("mvrv-interpretation", mvrvInterp);
+  }
+
+  /* ============================================================
+     Tooltip system
+     ============================================================ */
+  function createTooltip(content) {
+    var tip = document.createElement("div");
+    tip.className = "tooltip-box";
+
+    if (typeof content === "string") {
+      tip.textContent = content;
+    } else if (Array.isArray(content)) {
+      // Zone glossary — render each zone with its color dot
+      content.forEach(function (zone) {
+        var row = document.createElement("div");
+        row.className = "tooltip-zone-row";
+        row.innerHTML = '<span class="tooltip-zone-dot zone-' + zone.color + '"></span>'
+          + "<strong>" + zone.name + "</strong>: " + zone.description;
+        tip.appendChild(row);
+      });
+    }
+
+    return tip;
+  }
+
+  function attachTooltip(triggerEl, content) {
+    var tip = null;
+
+    function show() {
+      tip = createTooltip(content);
+      document.body.appendChild(tip);
+      var rect = triggerEl.getBoundingClientRect();
+      tip.style.top = (rect.bottom + window.scrollY + 8) + "px";
+      tip.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 320) + "px";
+      tip.classList.add("visible");
+    }
+
+    function hide() {
+      if (tip) { tip.remove(); tip = null; }
+    }
+
+    triggerEl.addEventListener("mouseenter", show);
+    triggerEl.addEventListener("mouseleave", hide);
+    triggerEl.addEventListener("focus", show);
+    triggerEl.addEventListener("blur", hide);
+    // Mobile tap toggle
+    triggerEl.addEventListener("click", function (e) {
+      if (tip) { hide(); } else { show(); e.stopPropagation(); }
+    });
+    document.addEventListener("click", hide);
+  }
+
+  function attachAllTooltips() {
+    if (typeof TOOLTIPS === "undefined") return;
+
+    // Helper: add tooltip-trigger class + attach tooltip
+    function setup(el, content) {
+      if (!el || !content) return;
+      el.classList.add("tooltip-trigger");
+      attachTooltip(el, content);
+    }
+
+    // Title links — navigation + tooltip on hover (no tooltip-trigger needed;
+    // metric-title-link already provides the dotted underline signal)
+    var rpTitle = document.querySelector("#rp-label .metric-title-link");
+    if (rpTitle) attachTooltip(rpTitle, TOOLTIPS.realizedPriceTitle.text);
+
+    var mvrvTitle = document.querySelector("#mvrv-label .metric-title-link");
+    if (mvrvTitle) attachTooltip(mvrvTitle, TOOLTIPS.mvrvZScoreTitle.text);
+
+    // Realized Price data points
+    setup(document.getElementById("rp-value"),          TOOLTIPS.realizedPriceValue.text);
+    setup(document.getElementById("btc-price-display"), TOOLTIPS.btcSpotPrice.text);
+    setup(document.getElementById("rp-premium"),        TOOLTIPS.premiumDiscount.text);
+
+    // MVRV Z-Score value
+    setup(document.getElementById("mvrv-value"), TOOLTIPS.mvrvZScoreValue.text);
+
+    // Zone badges — full zone glossary
+    setup(document.getElementById("rp-zone-badge"),   TOOLTIPS.zoneBadge.zones);
+    setup(document.getElementById("mvrv-zone-badge"), TOOLTIPS.zoneBadge.zones);
   }
 
   /* ============================================================
@@ -373,6 +466,9 @@
     }
 
     renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));
+
+    // Attach tooltips after data has rendered
+    attachAllTooltips();
 
   }).catch(function (err) {
     console.error("[btc-cycle] failed to load metrics:", err);

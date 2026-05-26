@@ -97,19 +97,21 @@
 
       <!-- Block 1 — Realized Price -->
       <div class="metric-block reveal" aria-labelledby="rp-label">
-        <p class="metric-label" id="rp-label">Realized Price</p>
+        <p class="metric-label" id="rp-label">
+          <a class="metric-title-link" href="https://www.bitcoinmagazinepro.com/charts/realized-price/" target="_blank" rel="noopener">Realized Price</a>
+        </p>
 
         <div class="metric-value-row">
-          <span class="metric-value" id="rp-value" aria-label="Realized Price">—</span>
+          <span class="metric-value" id="rp-value" aria-label="Realized Price" tabindex="0">—</span>
           <span class="metric-spot-label">
-            BTC <span id="btc-price-display">—</span>
+            BTC <span id="btc-price-display" tabindex="0">—</span>
           </span>
         </div>
 
-        <p class="metric-premium" id="rp-premium" aria-label="Premium or discount vs realized price">—</p>
+        <p class="metric-premium" id="rp-premium" aria-label="Premium or discount vs realized price" tabindex="0">—</p>
 
         <div class="metric-zone-row">
-          <span class="zone-badge zone-badge--neutral" id="rp-zone-badge">—</span>
+          <span class="zone-badge zone-badge--neutral" id="rp-zone-badge" tabindex="0">—</span>
         </div>
 
         <p class="metric-interpretation" id="rp-interpretation"></p>
@@ -117,14 +119,16 @@
 
       <!-- Block 2 — MVRV Z-Score -->
       <div class="metric-block reveal" aria-labelledby="mvrv-label">
-        <p class="metric-label" id="mvrv-label">MVRV Z-Score</p>
+        <p class="metric-label" id="mvrv-label">
+          <a class="metric-title-link" href="https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/" target="_blank" rel="noopener">MVRV Z-Score</a>
+        </p>
 
         <div class="metric-value-row">
-          <span class="metric-value" id="mvrv-value" aria-label="MVRV Z-Score">—</span>
+          <span class="metric-value" id="mvrv-value" aria-label="MVRV Z-Score" tabindex="0">—</span>
         </div>
 
         <div class="metric-zone-row">
-          <span class="zone-badge zone-badge--neutral" id="mvrv-zone-badge">—</span>
+          <span class="zone-badge zone-badge--neutral" id="mvrv-zone-badge" tabindex="0">—</span>
         </div>
 
         <p class="metric-interpretation" id="mvrv-interpretation"></p>
@@ -157,6 +161,7 @@
     </div>
   </footer>
 
+  <script src="tooltips.js"></script>
   <script src="main.js" defer></script>
 </body>
 </html>

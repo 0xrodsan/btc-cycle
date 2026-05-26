@@ -585,6 +585,81 @@ svg {
 }
 
 /* ============================================================
+   Tooltip triggers — dotted underline signals "more info"
+   ============================================================ */
+.tooltip-trigger {
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+  text-underline-offset: 3px;
+}
+
+/* ============================================================
+   Metric title links
+   ============================================================ */
+.metric-title-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+
+.metric-title-link:hover {
+  opacity: 0.75;
+}
+
+/* ============================================================
+   Tooltip box
+   ============================================================ */
+.tooltip-box {
+  position: absolute;
+  z-index: 200;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 12px 16px;
+  max-width: 300px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #ccc;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.tooltip-box.visible {
+  opacity: 1;
+}
+
+.tooltip-zone-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tooltip-zone-row:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-zone-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+/* ============================================================
+   Zone color system — solid fills for tooltip dots
+   These classes are used by .tooltip-zone-dot and can be
+   reused anywhere a solid zone color is needed.
+   ============================================================ */
+.zone-green      { background-color: #1a9e5c; }
+.zone-soft-green { background-color: #2d7a4f; }
+.zone-neutral    { background-color: #4a4a4a; }
+.zone-amber      { background-color: #b07d2a; }
+.zone-red        { background-color: #9e2a2a; }
+
+/* ============================================================
    Responsive — tablet & up
    ============================================================ */
 @media (min-width: 720px) {
