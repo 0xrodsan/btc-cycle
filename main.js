@@ -444,12 +444,12 @@
       attachTooltip(mvrvValueEl, mvrvValueText);
     }
 
-    // Zone badges — full zone glossary
+    // Zone badges — per-metric glossaries
     var rpBadgeEl   = document.getElementById("rp-zone-badge");
-    if (rpBadgeEl)   attachTooltip(rpBadgeEl,   TOOLTIPS.zoneBadge.zones);
+    if (rpBadgeEl)   attachTooltip(rpBadgeEl,   TOOLTIPS.realizedPriceZoneBadge.zones);
 
     var mvrvBadgeEl = document.getElementById("mvrv-zone-badge");
-    if (mvrvBadgeEl) attachTooltip(mvrvBadgeEl, TOOLTIPS.zoneBadge.zones);
+    if (mvrvBadgeEl) attachTooltip(mvrvBadgeEl, TOOLTIPS.mvrvZoneBadge.zones);
   }
 
   /* ============================================================

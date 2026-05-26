@@ -37,8 +37,8 @@ const TOOLTIPS = {
     text: "A Z-Score of 0 to 2.5 means the market is within normal historical range. No cycle peak has ever occurred at this level. Values above 5 have historically coincided with cycle tops."
   },
 
-  // --- Zone badge (shared glossary for both metrics) ---
-  zoneBadge: {
+  // --- Zone badge glossaries (one per metric) ---
+  realizedPriceZoneBadge: {
     label: "Current zone",
     zones: [
       {
@@ -65,6 +65,32 @@ const TOOLTIPS = {
         name: "Distribution",
         color: "red",
         description: "Historically, this zone has marked cycle peaks. Patient capital tends to reduce exposure here."
+      }
+    ]
+  },
+
+  mvrvZoneBadge: {
+    label: "Current zone",
+    zones: [
+      {
+        name: "Deep Accumulation",
+        color: "green",
+        description: "Z-Score below 0.1 — historically the rarest zone. Every major cycle low has occurred here."
+      },
+      {
+        name: "Fair Value",
+        color: "neutral",
+        description: "Z-Score between 0.1 and 2.5 — within normal historical range. No cycle peak or bottom has occurred here."
+      },
+      {
+        name: "Caution",
+        color: "amber",
+        description: "Z-Score between 2.5 and 5.0 — market stretching above norms. Elevated unrealized profit across holders."
+      },
+      {
+        name: "Distribution",
+        color: "red",
+        description: "Z-Score above 5.0 — historically extreme. Every prior cycle peak occurred in or near this zone."
       }
     ]
   },
