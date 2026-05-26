@@ -23,7 +23,7 @@ const TOOLTIPS = {
 
   btcSpotPrice: {
     label: "Current BTC price",
-    text: "Current Bitcoin market price, updated daily. Comparing this to Realized Price shows whether the average holder is currently in profit or loss."
+    text: "Current Bitcoin market price, fetched live on page load from CoinGecko. Refreshes every time you reload the page."
   },
 
   premiumDiscount: {

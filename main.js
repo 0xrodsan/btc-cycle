@@ -260,26 +260,34 @@
   /* ============================================================
      Freshness line
      ============================================================ */
-  function renderFreshness(rpDate, mvrvDate) {
+  function renderFreshness(rpDate, mvrvDate, isLive) {
     var date = rpDate || mvrvDate;
-    var el = document.getElementById("last-update");
-    if (!el) return;
+    var freshnessEl = document.querySelector(".data-freshness");
 
+    var dateStr = "";
     if (date) {
-      // Accept ISO strings or just YYYY-MM-DD
-      var d = new Date(date);
+      // Append T00:00:00Z to force UTC parsing — avoids timezone off-by-one
+      var d = new Date(date + "T00:00:00Z");
       if (!isNaN(d.getTime())) {
-        el.textContent = d.toLocaleDateString("en-US", {
-          year: "numeric", month: "long", day: "numeric"
+        dateStr = d.toLocaleDateString("en-US", {
+          year: "numeric", month: "long", day: "numeric", timeZone: "UTC"
         });
-        return;
       }
     }
+    if (!dateStr) {
+      dateStr = new Date().toLocaleDateString("en-US", {
+        year: "numeric", month: "long", day: "numeric"
+      });
+    }
 
-    // Fallback: today
-    el.textContent = new Date().toLocaleDateString("en-US", {
-      year: "numeric", month: "long", day: "numeric"
-    });
+    if (freshnessEl) {
+      var liveSuffix = isLive ? " · BTC price: live" : "";
+      freshnessEl.innerHTML = "On-chain data updated daily · Last update: <span id=\"last-update\">"
+        + dateStr + "</span>" + liveSuffix;
+    } else {
+      var el = document.getElementById("last-update");
+      if (el) el.textContent = dateStr;
+    }
   }
 
   /* ============================================================
@@ -453,6 +461,25 @@
   }
 
   /* ============================================================
+     Live BTC price — fetched from CoinGecko on page load.
+     Falls back to null on any error; caller uses static data.
+     ============================================================ */
+  async function fetchLiveBtcPrice() {
+    try {
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+        { cache: "no-store" }
+      );
+      if (!res.ok) throw new Error("CoinGecko fetch failed");
+      const data = await res.json();
+      return data.bitcoin.usd;
+    } catch (err) {
+      console.warn("Live BTC price unavailable, falling back to static data:", err);
+      return null;
+    }
+  }
+
+  /* ============================================================
      Fetch helper (returns a Promise)
      ============================================================ */
   function fetchJSON(path) {
@@ -476,19 +503,15 @@
   ]).then(function (results) {
     var rpRaw   = results[0];
     var mvrvRaw = results[1];
-    var btcRaw  = results[2];
+    var btcRaw  = results[2];   // static fallback only
 
-    var rpValue  = extractNumeric(rpRaw);
-    var zScore   = extractNumeric(mvrvRaw);
-    var btcPrice = extractBtcPrice(btcRaw);
+    var rpValue = extractNumeric(rpRaw);
+    var zScore  = extractNumeric(mvrvRaw);
 
-    if (rpValue === null || zScore === null || btcPrice === null) {
+    if (rpValue === null || zScore === null) {
       showError("Data unavailable — will retry on next update.");
       return;
     }
-
-    renderRealizedPrice(rpValue, btcPrice);
-    renderMvrv(zScore);
 
     // Freshness — handle BGeometrics array format (last entry has "d" field)
     // Also handles flat CoinGecko object with injected fetched_at field
@@ -501,10 +524,23 @@
       return null;
     }
 
-    renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));
+    // Try live BTC price; fall back to static btc-price.json on failure
+    return fetchLiveBtcPrice().then(function (livePrice) {
+      var btcPrice = livePrice !== null ? livePrice : extractBtcPrice(btcRaw);
+      var isLive   = livePrice !== null;
 
-    // Attach tooltips after data has rendered
-    attachAllTooltips(zScore);
+      if (btcPrice === null) {
+        showError("Data unavailable — will retry on next update.");
+        return;
+      }
+
+      renderRealizedPrice(rpValue, btcPrice);
+      renderMvrv(zScore);
+      renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw), isLive);
+
+      // Attach tooltips after data has rendered
+      attachAllTooltips(zScore);
+    });
 
   }).catch(function (err) {
     console.error("[btc-cycle] failed to load metrics:", err);
