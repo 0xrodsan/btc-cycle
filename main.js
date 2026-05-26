@@ -491,13 +491,14 @@
     renderMvrv(zScore);
 
     // Freshness — handle BGeometrics array format (last entry has "d" field)
+    // Also handles flat CoinGecko object with injected fetched_at field
     function extractDate(raw) {
-      if (!raw) return null;
-      // Array: take last element
-      var obj = Array.isArray(raw) ? raw[raw.length - 1] : raw;
-      if (!obj) return null;
-      // Try "d" (BGeometrics), then "date", then nested data.date
-      return obj.d || obj.date || (obj.data && (obj.data.d || obj.data.date)) || null;
+      if (Array.isArray(raw) && raw.length > 0) {
+        var last = raw[raw.length - 1];
+        return last.d || last.date || last.timestamp || null;
+      }
+      if (raw && raw.fetched_at) return raw.fetched_at;
+      return null;
     }
 
     renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));

@@ -30,9 +30,9 @@ jobs:
 
       - name: Fetch BTC Spot Price (CoinGecko)
         run: |
-          curl -sf \
-            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd" \
-            -o data/btc-price.json
+          PRICE_DATA=$(curl -s "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
+          FETCHED_AT=$(date -u +"%Y-%m-%d")
+          echo "$PRICE_DATA" | jq --arg date "$FETCHED_AT" '. + {fetched_at: $date}' > data/btc-price.json
 
       - name: Commit if changed
         run: |
