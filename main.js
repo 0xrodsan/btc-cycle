@@ -337,67 +337,86 @@
   }
 
   /* ============================================================
-     Tooltip system
+     Tooltip system — single instance, mobile-safe
      ============================================================ */
-  function createTooltip(content) {
-    var tip = document.createElement("div");
-    tip.className = "tooltip-box";
+  var tooltipEl = document.createElement("div");
+  tooltipEl.className = "tooltip-box";
+  tooltipEl.setAttribute("role", "tooltip");
+  document.body.appendChild(tooltipEl);
 
+  var currentTrigger = null;
+
+  function renderTooltipContent(content) {
+    tooltipEl.innerHTML = "";
     if (typeof content === "string") {
-      tip.textContent = content;
+      var p = document.createElement("p");
+      p.textContent = content;
+      tooltipEl.appendChild(p);
     } else if (Array.isArray(content)) {
-      // Zone glossary — render each zone with its color dot
       content.forEach(function (zone) {
         var row = document.createElement("div");
         row.className = "tooltip-zone-row";
-        row.innerHTML = '<span class="tooltip-zone-dot zone-' + zone.color + '"></span>'
-          + "<strong>" + zone.name + "</strong>: " + zone.description;
-        tip.appendChild(row);
+        row.innerHTML = '<span class="tooltip-zone-dot zone-dot-' + zone.color + '"></span>'
+          + "<div><strong>" + zone.name + "</strong><p>" + zone.description + "</p></div>";
+        tooltipEl.appendChild(row);
       });
     }
+  }
 
-    return tip;
+  function positionTooltip(triggerEl) {
+    var rect = triggerEl.getBoundingClientRect();
+    var tipWidth = 300;
+    var left = rect.left + window.scrollX;
+    var top  = rect.bottom + window.scrollY + 8;
+
+    if (left + tipWidth > window.innerWidth - 16) {
+      left = window.innerWidth - tipWidth - 16;
+    }
+    if (left < 8) left = 8;
+
+    tooltipEl.style.top  = top  + "px";
+    tooltipEl.style.left = left + "px";
+  }
+
+  function showTooltip(triggerEl, content) {
+    if (currentTrigger === triggerEl) return;
+    currentTrigger = triggerEl;
+    renderTooltipContent(content);
+    positionTooltip(triggerEl);
+    tooltipEl.classList.add("visible");
+  }
+
+  function hideTooltip() {
+    currentTrigger = null;
+    tooltipEl.classList.remove("visible");
   }
 
   function attachTooltip(triggerEl, content) {
-    var tip = null;
+    triggerEl.classList.add("tooltip-trigger");
+    triggerEl.setAttribute("tabindex", "0");
 
-    function show() {
-      tip = createTooltip(content);
-      document.body.appendChild(tip);
-      var rect = triggerEl.getBoundingClientRect();
-      tip.style.top = (rect.bottom + window.scrollY + 8) + "px";
-      tip.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 320) + "px";
-      tip.classList.add("visible");
-    }
+    triggerEl.addEventListener("mouseenter", function () { showTooltip(triggerEl, content); });
+    triggerEl.addEventListener("mouseleave", hideTooltip);
+    triggerEl.addEventListener("focus",      function () { showTooltip(triggerEl, content); });
+    triggerEl.addEventListener("blur",       hideTooltip);
 
-    function hide() {
-      if (tip) { tip.remove(); tip = null; }
-    }
-
-    triggerEl.addEventListener("mouseenter", show);
-    triggerEl.addEventListener("mouseleave", hide);
-    triggerEl.addEventListener("focus", show);
-    triggerEl.addEventListener("blur", hide);
     // Mobile tap toggle
     triggerEl.addEventListener("click", function (e) {
-      if (tip) { hide(); } else { show(); e.stopPropagation(); }
+      e.stopPropagation();
+      if (currentTrigger === triggerEl) { hideTooltip(); }
+      else                              { showTooltip(triggerEl, content); }
     });
-    document.addEventListener("click", hide);
   }
+
+  // Close on outside click, scroll, or resize
+  document.addEventListener("click",  hideTooltip);
+  document.addEventListener("scroll", hideTooltip, { passive: true });
+  window.addEventListener("resize",   hideTooltip);
 
   function attachAllTooltips() {
     if (typeof TOOLTIPS === "undefined") return;
 
-    // Helper: add tooltip-trigger class + attach tooltip
-    function setup(el, content) {
-      if (!el || !content) return;
-      el.classList.add("tooltip-trigger");
-      attachTooltip(el, content);
-    }
-
-    // Title links — navigation + tooltip on hover (no tooltip-trigger needed;
-    // metric-title-link already provides the dotted underline signal)
+    // Title links — navigation + tooltip on hover
     var rpTitle = document.querySelector("#rp-label .metric-title-link");
     if (rpTitle) attachTooltip(rpTitle, TOOLTIPS.realizedPriceTitle.text);
 
@@ -405,16 +424,25 @@
     if (mvrvTitle) attachTooltip(mvrvTitle, TOOLTIPS.mvrvZScoreTitle.text);
 
     // Realized Price data points
-    setup(document.getElementById("rp-value"),          TOOLTIPS.realizedPriceValue.text);
-    setup(document.getElementById("btc-price-display"), TOOLTIPS.btcSpotPrice.text);
-    setup(document.getElementById("rp-premium"),        TOOLTIPS.premiumDiscount.text);
+    var rpValueEl  = document.getElementById("rp-value");
+    if (rpValueEl)  attachTooltip(rpValueEl,  TOOLTIPS.realizedPriceValue.text);
 
-    // MVRV Z-Score value
-    setup(document.getElementById("mvrv-value"), TOOLTIPS.mvrvZScoreValue.text);
+    var btcPriceEl = document.getElementById("btc-price-display");
+    if (btcPriceEl) attachTooltip(btcPriceEl, TOOLTIPS.btcSpotPrice.text);
+
+    var rpPremEl   = document.getElementById("rp-premium");
+    if (rpPremEl)   attachTooltip(rpPremEl,   TOOLTIPS.premiumDiscount.text);
+
+    // MVRV Z-Score value — static text; commit 2 upgrades to dynamic
+    var mvrvValueEl = document.getElementById("mvrv-value");
+    if (mvrvValueEl) attachTooltip(mvrvValueEl, TOOLTIPS.mvrvZScoreValue.text);
 
     // Zone badges — full zone glossary
-    setup(document.getElementById("rp-zone-badge"),   TOOLTIPS.zoneBadge.zones);
-    setup(document.getElementById("mvrv-zone-badge"), TOOLTIPS.zoneBadge.zones);
+    var rpBadgeEl   = document.getElementById("rp-zone-badge");
+    if (rpBadgeEl)   attachTooltip(rpBadgeEl,   TOOLTIPS.zoneBadge.zones);
+
+    var mvrvBadgeEl = document.getElementById("mvrv-zone-badge");
+    if (mvrvBadgeEl) attachTooltip(mvrvBadgeEl, TOOLTIPS.zoneBadge.zones);
   }
 
   /* ============================================================
