@@ -75,22 +75,27 @@ const TOOLTIPS = {
       {
         name: "Deep Accumulation",
         color: "green",
-        description: "Z-Score below 0.1 — historically the rarest zone. Every major cycle low has occurred here."
+        description: "Z-Score below 0.5 — statistically rare. Every major cycle low has occurred at or below this level."
+      },
+      {
+        name: "Accumulation",
+        color: "blue",
+        description: "Z-Score between 0.5 and 1.5 — below the historical average. A historically favorable zone for long-term entry."
       },
       {
         name: "Fair Value",
         color: "neutral",
-        description: "Z-Score between 0.1 and 2.5 — within normal historical range. No cycle peak or bottom has occurred here."
+        description: "Z-Score between 1.5 and 3.0 — near the historical mean. No extreme signal in either direction."
       },
       {
         name: "Caution",
         color: "amber",
-        description: "Z-Score between 2.5 and 5.0 — market stretching above norms. Elevated unrealized profit across holders."
+        description: "Z-Score between 3.0 and 6.0 — above historical norms. Elevated unrealized profit across the market."
       },
       {
         name: "Distribution",
         color: "red",
-        description: "Z-Score above 5.0 — historically extreme. Every prior cycle peak occurred in or near this zone."
+        description: "Z-Score above 6.0 — historically extreme. Every prior cycle peak occurred in or near this zone."
       }
     ]
   },
@@ -108,8 +113,9 @@ const TOOLTIPS = {
   // MVRV Z-Score interpretations
   mvrvInterpretation: {
     "Deep Accumulation": "Z-Score in historically rare territory. Every major cycle low has occurred at this level.",
-    "Fair Value":        "Z-Score within normal statistical range. No cycle peak or bottom has occurred at this level.",
-    "Caution":           "Z-Score is stretching above historical norms. Elevated unrealized profit across the market.",
+    "Accumulation":      "Z-Score below the historical average. A historically favorable zone for long-term entry.",
+    "Fair Value":        "Z-Score near the historical mean. No extreme signal in either direction.",
+    "Caution":           "Z-Score stretching above historical norms. Elevated unrealized profit across the market.",
     "Distribution":      "Z-Score at historically extreme levels. Every prior cycle peak occurred in or near this zone."
   }
 
