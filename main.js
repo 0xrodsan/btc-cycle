@@ -190,25 +190,31 @@
      ============================================================ */
   var MVRV_ZONES = [
     {
-      test: function (z) { return z < 0.1; },
+      test: function (z) { return z < 0.5; },
       label: "Deep Accumulation",
       color: "green",
       copy: "Z-Score in historically rare undervaluation territory. Major cycle lows have occurred in this zone."
     },
     {
-      test: function (z) { return z >= 0.1 && z < 2.5; },
+      test: function (z) { return z >= 0.5 && z < 1.5; },
+      label: "Accumulation",
+      color: "blue",
+      copy: "Z-Score above deep undervaluation but still below historical norms. A historically favorable zone before broader price discovery."
+    },
+    {
+      test: function (z) { return z >= 1.5 && z < 3.0; },
       label: "Fair Value",
       color: "neutral",
       copy: "Z-Score within normal historical range. Market is not at a statistically extreme level."
     },
     {
-      test: function (z) { return z >= 2.5 && z < 5.0; },
+      test: function (z) { return z >= 3.0 && z < 6.0; },
       label: "Caution",
       color: "amber",
       copy: "Z-Score is stretching above historical norms. Elevated unrealized profit across the market."
     },
     {
-      test: function (z) { return z >= 5.0; },
+      test: function (z) { return z >= 6.0; },
       label: "Distribution",
       color: "red",
       copy: "Z-Score at historically extreme levels. Each prior cycle peak occurred in or near this zone."
@@ -219,7 +225,7 @@
     for (var i = 0; i < MVRV_ZONES.length; i++) {
       if (MVRV_ZONES[i].test(z)) return MVRV_ZONES[i];
     }
-    return MVRV_ZONES[1]; // fallback: Fair Value
+    return MVRV_ZONES[2]; // fallback: Fair Value
   }
 
   /* ============================================================
