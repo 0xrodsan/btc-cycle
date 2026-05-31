@@ -28,7 +28,7 @@ const TOOLTIPS = {
 
   premiumDiscount: {
     label: "Premium / Discount",
-    text: "How far the current market price is from the average holder's cost basis. Above 150% has historically marked distribution zones. Negative values have marked generational lows."
+    text: "How far the current market price is above the average holder's cost basis. Zones: below 0% = Deep Accumulation · 0–25% = Accumulation · 25–75% = Fair Value · 75–150% = Caution · above 150% = Distribution."
   },
 
   // --- MVRV Z-Score data points ---
@@ -44,27 +44,27 @@ const TOOLTIPS = {
       {
         name: "Deep Accumulation",
         color: "green",
-        description: "Price is below the average holder cost basis. Historically, the rarest zone — major cycle lows have occurred here."
+        description: "Market price is below the average cost basis (negative premium). Historically the rarest zone — every major cycle low has occurred here."
       },
       {
         name: "Accumulation",
         color: "blue",
-        description: "Market is modestly above average cost basis. A historically favorable zone for long-term entry."
+        description: "Market price is 0% to 25% above the average cost basis. A historically favorable zone for long-term entry."
       },
       {
         name: "Fair Value",
         color: "neutral",
-        description: "No extreme signal. The market is near its historical equilibrium — neither cheap nor expensive."
+        description: "Market price is 25% to 75% above the average cost basis. No extreme signal — a neutral historical zone."
       },
       {
         name: "Caution",
         color: "amber",
-        description: "The market is running above historical norms. Long-term holders are in significant profit — watch for distribution."
+        description: "Market price is 75% to 150% above the average cost basis. Long-term holders in significant profit — watch for distribution behavior."
       },
       {
         name: "Distribution",
         color: "red",
-        description: "Historically, this zone has marked cycle peaks. Patient capital tends to reduce exposure here."
+        description: "Market price is more than 150% above the average cost basis. Every prior cycle peak occurred in or near this zone."
       }
     ]
   },
