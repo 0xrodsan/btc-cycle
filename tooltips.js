@@ -149,39 +149,39 @@ const TOOLTIPS = {
     "Strong Distribution": "Heavy distribution from long-term holders. This level of selling has historically coincided with cycle tops."
   },
 
-  // --- Exchange Reserve ---
-  exchangeTitle: {
-    label: "Exchange Reserve",
-    text: "Total Bitcoin held on centralized exchanges. Falling reserves mean coins are moving to cold storage — reducing available sell-side supply. Rising reserves mean more BTC available for sale."
+  // --- Supply in Cold Storage ---
+  coldStorageTitle: {
+    label: "Supply in Cold Storage",
+    text: "Bitcoin held by entities with little or no history of spending — long-term holders, cold storage, and deep conviction investors. Rising values mean more BTC is leaving active circulation. Reference chart shows LTH Supply as a close proxy."
   },
 
-  exchangeReserveValue: {
-    label: "Exchange reserve",
-    text: "The total amount of Bitcoin currently held on exchanges. Lower is historically more bullish — it means less BTC is available to be sold immediately."
+  coldStorageValue: {
+    label: "Cold storage supply",
+    text: "Total Bitcoin currently held by illiquid entities. Higher values mean less BTC is available for immediate sale — historically associated with tightening supply and upward price pressure."
   },
 
-  exchangeChangeValue: {
+  coldStorageChange: {
     label: "30d change",
-    text: "How much the exchange reserve changed over the last 30 days, as a percentage. Negative = outflows (bullish). Positive = inflows (bearish)."
+    text: "How much cold storage supply changed over the last 30 days. Positive = more BTC moving to long-term storage (bullish). Negative = illiquid coins returning to active markets (bearish)."
   },
 
-  exchangeZoneBadge: {
-    label: "Exchange flow zone",
+  coldStorageZoneBadge: {
+    label: "Cold storage zone",
     zones: [
-      { name: "Strong Outflow", color: "green",   description: "Reserves falling more than 2% in 30 days. Bitcoin moving rapidly to cold storage — strong bullish signal." },
-      { name: "Outflow",        color: "blue",    description: "Reserves falling 0.5% to 2% in 30 days. Net outflow — holders moving coins to self-custody." },
-      { name: "Neutral",        color: "neutral", description: "Reserves stable within ±0.5%. No meaningful directional flow signal." },
-      { name: "Inflow",         color: "amber",   description: "Reserves rising 0.5% to 2% in 30 days. More BTC moving to exchanges — potential selling pressure ahead." },
-      { name: "Strong Inflow",  color: "red",     description: "Reserves rising more than 2% in 30 days. Heavy inflow — historically a distribution signal." }
+      { name: "Strong Accumulation", color: "green",   description: "Cold storage growing more than 1% in 30 days. Large amounts of BTC leaving active circulation — strong bullish signal." },
+      { name: "Accumulation",        color: "blue",    description: "Cold storage growing 0.2% to 1% in 30 days. Bitcoin steadily moving to long-term custody." },
+      { name: "Neutral",             color: "neutral", description: "Cold storage stable within ±0.2%. No meaningful directional signal." },
+      { name: "Distribution",        color: "amber",   description: "Cold storage falling 0.2% to 1% in 30 days. Previously illiquid coins returning to active markets." },
+      { name: "Strong Distribution", color: "red",     description: "Cold storage falling more than 1% in 30 days. Significant coins returning to circulation — historically a bearish signal." }
     ]
   },
 
-  exchangeInterpretation: {
-    "Strong Outflow": "Bitcoin leaving exchanges rapidly. Coins moving to cold storage — historically a bullish signal for long-term holders.",
-    "Outflow":        "Net outflow from exchanges. Holders moving coins to self-custody — reducing available sell-side supply.",
-    "Neutral":        "Exchange reserves stable. No strong directional signal from exchange flows.",
-    "Inflow":         "Net inflow to exchanges. More BTC available for sale — watch for increased selling pressure.",
-    "Strong Inflow":  "Bitcoin flowing heavily into exchanges. Historically a distribution signal — patient capital tends to reduce exposure here."
+  coldStorageInterpretation: {
+    "Strong Accumulation": "Cold storage growing rapidly. Large amounts of BTC moving to long-term custody — a historically strong bullish signal.",
+    "Accumulation":        "Cold storage rising. Bitcoin steadily leaving active circulation — holders accumulating with conviction.",
+    "Neutral":             "Cold storage stable. No strong directional signal from long-term holder behavior.",
+    "Distribution":        "Cold storage falling. Previously illiquid coins returning to active markets — watch for increased sell pressure.",
+    "Strong Distribution": "Cold storage falling rapidly. Significant coins returning to circulation — historically a bearish signal near cycle tops."
   }
 
 };
