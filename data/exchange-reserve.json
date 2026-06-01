@@ -1,5 +1,1 @@
-[
-  ["2026-05-29", 1780012800, 53571.83],
-  ["2026-05-30", 1780099200, 53586.91],
-  ["2026-05-31", 1780185600, 53557.09]
-]
+{"error":{"status":403,"code":"INVALID_TOKEN","message":"Access denied: invalid or expired token. Subscription required. https://bitcoin-data.com/bguser/pricing"}}
