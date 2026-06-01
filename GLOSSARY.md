@@ -203,6 +203,8 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 
 **How exchanges are identified on-chain**: blockchain analytics firms (Glassnode, Arkham, Nansen) use address clustering — grouping addresses that transact together and matching deposit/withdrawal patterns to known exchange addresses. This is why entity-adjusted data is more reliable than raw address data.
 
+**Data availability note**: The BGeometrics endpoint `exchange-netflow-btc` requires a paid plan and is not available on the free tier. In `btc-cycle` Iteration 2, this metric was replaced by **Illiquid Supply** (endpoint: `illiquid-supply`), which serves as a strong proxy — coins leaving exchanges typically move to illiquid wallets, so both metrics capture the same underlying behavior of patient capital reducing sell-side exposure.
+
 ---
 
 ### HODL Waves
@@ -214,6 +216,36 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 **Why it matters**: HODL Waves make LTH behavior visible at a macro level. The growth of the 1-year+ bands in a bear market is the visual representation of accumulation — coins being absorbed by holders who intend to wait for the next cycle.
 
 🚧 *Visual metric — more useful as context for LTH Supply than as a standalone signal in `btc-cycle`.*
+
+---
+
+### Supply in Cold Storage (Illiquid Supply)
+
+**Plain language**: The total amount of Bitcoin held by wallets that rarely or never spend. Think of it as BTC that has effectively left active markets and gone into long-term storage — cold wallets, hardware wallets, deep conviction holders. When this number rises, more BTC is leaving circulation. When it falls, previously stored coins are returning to active markets.
+
+**Technical**: BGeometrics defines an entity as "illiquid" when its ratio of cumulative outflows to cumulative inflows (lifetime liquidity L) is below 0.25. Illiquid Supply = sum of all BTC held by entities with L ≲ 0.25.
+
+**User-facing name in `btc-cycle`**: "Supply in Cold Storage" — chosen over "Illiquid Supply" for accessibility. Both refer to the same metric.
+
+**Why it matters**:
+- Rising illiquid supply = more BTC leaving active circulation = tightening available sell-side supply
+- Falling illiquid supply = previously stored coins returning to markets = increased sell-side pressure
+- Strongly correlated with exchange reserve trends (coins leaving exchanges go to illiquid wallets)
+
+**Zone thresholds (30d % change)**:
+- Strong Accumulation: > +1%
+- Accumulation: +0.2% to +1%
+- Neutral: -0.2% to +0.2%
+- Distribution: -1% to -0.2%
+- Strong Distribution: < -1%
+
+**Endpoint**: `https://api.bgeometrics.com/v1/illiquid-supply`
+**Data format**: Array of daily entries — [date, timestamp, illiquid_value, liquid_value]
+**Reference chart**: https://www.bitcoinmagazinepro.com/charts/long-term-holder-supply/ (LTH Supply — closest free public proxy)
+
+**Relationship to Exchange Reserve**: Exchange Reserve measures BTC on exchanges directly. Illiquid Supply measures the destination — where coins go after leaving exchanges. Both signal the same smart-money behavior from different angles.
+
+**Used in `btc-cycle`**: Yes — Iteration 2. Replaces Exchange Reserve/Netflow (both require paid BGeometrics plan).
 
 ---
 
