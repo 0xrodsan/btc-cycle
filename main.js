@@ -142,20 +142,19 @@
     return null;
   }
 
-  function extractExchangeReserve(json) {
-    // Returns { current, prev30d, changePct }
+  function extractColdStorage(json) {
     if (Array.isArray(json) && json.length > 30) {
       var last = json[json.length - 1];
       var prev = json[json.length - 31];
-      var getVal = function (entry) {
-        if (entry.exchangeReserveBtc !== undefined) return parseFloat(entry.exchangeReserveBtc);
+      var getVal = function(entry) {
         if (Array.isArray(entry)) return parseFloat(entry[2]);
-        return parseFloat(entry.v || entry.value);
+        if (entry.illiquidSupply !== undefined) return parseFloat(entry.illiquidSupply);
+        return parseFloat(entry.v || entry.value || 0);
       };
-      var current  = getVal(last);
+      var current = getVal(last);
       var previous = getVal(prev);
       var changePct = ((current - previous) / previous) * 100;
-      return { current: current, prev30d: previous, changePct: changePct };
+      return { current: current, changePct: changePct };
     }
     return null;
   }
@@ -302,46 +301,41 @@
   }
 
   /* ============================================================
-     Zone logic — Exchange Reserve (30d % change)
+     Zone logic — Supply in Cold Storage (30d % change)
      ============================================================ */
-  var EXCHANGE_ZONES = [
+  var COLD_STORAGE_ZONES = [
     {
-      test: function (pct) { return pct < -2; },
-      label: "Strong Outflow",
-      color: "green",
-      copy: "Bitcoin leaving exchanges rapidly. Coins moving to cold storage — bullish."
+      test: function(pct) { return pct > 1.0; },
+      label: "Strong Accumulation", color: "green",
+      copy: "Cold storage growing rapidly. Large amounts of BTC leaving active circulation."
     },
     {
-      test: function (pct) { return pct < -0.5; },
-      label: "Outflow",
-      color: "blue",
-      copy: "Net outflow from exchanges. Holders moving coins to self-custody."
+      test: function(pct) { return pct > 0.2; },
+      label: "Accumulation", color: "blue",
+      copy: "Cold storage rising steadily. Bitcoin moving away from active markets."
     },
     {
-      test: function (pct) { return pct <= 0.5; },
-      label: "Neutral",
-      color: "neutral",
-      copy: "Exchange reserves stable. No strong directional signal."
+      test: function(pct) { return pct >= -0.2; },
+      label: "Neutral", color: "neutral",
+      copy: "Cold storage stable. No strong directional signal."
     },
     {
-      test: function (pct) { return pct <= 2; },
-      label: "Inflow",
-      color: "amber",
-      copy: "Net inflow to exchanges. More BTC available for sale — watch for selling pressure."
+      test: function(pct) { return pct >= -1.0; },
+      label: "Distribution", color: "amber",
+      copy: "Cold storage falling. Previously illiquid coins returning to active markets."
     },
     {
-      test: function (pct) { return pct > 2; },
-      label: "Strong Inflow",
-      color: "red",
-      copy: "Bitcoin flowing heavily into exchanges. Historically a distribution signal."
+      test: function(pct) { return pct < -1.0; },
+      label: "Strong Distribution", color: "red",
+      copy: "Cold storage falling rapidly. Significant coins returning to circulation."
     }
   ];
 
-  function getExchangeZone(pct) {
-    for (var i = 0; i < EXCHANGE_ZONES.length; i++) {
-      if (EXCHANGE_ZONES[i].test(pct)) return EXCHANGE_ZONES[i];
+  function getColdStorageZone(pct) {
+    for (var i = 0; i < COLD_STORAGE_ZONES.length; i++) {
+      if (COLD_STORAGE_ZONES[i].test(pct)) return COLD_STORAGE_ZONES[i];
     }
-    return EXCHANGE_ZONES[2]; // fallback: Neutral
+    return COLD_STORAGE_ZONES[2];
   }
 
   /* ============================================================
@@ -490,26 +484,24 @@
   }
 
   /* ============================================================
-     Render — Exchange Reserve block
+     Render — Supply in Cold Storage block
      ============================================================ */
-  function renderExchange(data) {
-    var zone = getExchangeZone(data.changePct);
-    var sign = data.changePct >= 0 ? "+" : "";
-    setTextSafe("exchange-reserve-value", Math.round(data.current).toLocaleString() + " BTC");
-    setTextSafe("exchange-change-value", sign + data.changePct.toFixed(2) + "% (30d)");
-
-    var badge = document.getElementById("exchange-zone-badge");
+  function renderColdStorage(data) {
+    var zone = getColdStorageZone(data.changePct);
+    var sign = data.changePct >= 0 ? '+' : '';
+    setTextSafe('cold-storage-value', Math.round(data.current).toLocaleString('en-US') + ' BTC');
+    setTextSafe('cold-storage-change', sign + data.changePct.toFixed(2) + '% (30d)');
+    var badge = document.getElementById('cold-storage-zone-badge');
     if (badge) {
       badge.textContent = zone.label;
-      badge.className = "zone-badge zone-badge--" + zone.color;
+      badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-
-    var interp = (typeof TOOLTIPS !== "undefined" &&
-                  TOOLTIPS.exchangeInterpretation &&
-                  TOOLTIPS.exchangeInterpretation[zone.label])
-      ? TOOLTIPS.exchangeInterpretation[zone.label]
+    var interp = (typeof TOOLTIPS !== 'undefined' &&
+                  TOOLTIPS.coldStorageInterpretation &&
+                  TOOLTIPS.coldStorageInterpretation[zone.label])
+      ? TOOLTIPS.coldStorageInterpretation[zone.label]
       : zone.copy;
-    setTextSafe("exchange-interpretation", interp);
+    setTextSafe('cold-storage-interpretation', interp);
   }
 
   /* ============================================================
@@ -637,18 +629,18 @@
     var lthBadgeEl = document.getElementById("lth-zone-badge");
     if (lthBadgeEl) attachTooltip(lthBadgeEl, TOOLTIPS.lthZoneBadge.zones);
 
-    // Exchange Reserve tooltips
-    var exchangeTitle = document.querySelector("#exchange-label .metric-title-link");
-    if (exchangeTitle) attachTooltip(exchangeTitle, TOOLTIPS.exchangeTitle.text);
+    // Cold Storage tooltips
+    var coldStorageTitle = document.querySelector("#cold-storage-block .metric-title-link");
+    if (coldStorageTitle) attachTooltip(coldStorageTitle, TOOLTIPS.coldStorageTitle.text);
 
-    var exchangeReserveEl = document.getElementById("exchange-reserve-value");
-    if (exchangeReserveEl) attachTooltip(exchangeReserveEl, TOOLTIPS.exchangeReserveValue.text);
+    var coldStorageValueEl = document.getElementById("cold-storage-value");
+    if (coldStorageValueEl) attachTooltip(coldStorageValueEl, TOOLTIPS.coldStorageValue.text);
 
-    var exchangeChangeEl = document.getElementById("exchange-change-value");
-    if (exchangeChangeEl) attachTooltip(exchangeChangeEl, TOOLTIPS.exchangeChangeValue.text);
+    var coldStorageChangeEl = document.getElementById("cold-storage-change");
+    if (coldStorageChangeEl) attachTooltip(coldStorageChangeEl, TOOLTIPS.coldStorageChange.text);
 
-    var exchangeBadgeEl = document.getElementById("exchange-zone-badge");
-    if (exchangeBadgeEl) attachTooltip(exchangeBadgeEl, TOOLTIPS.exchangeZoneBadge.zones);
+    var coldStorageBadgeEl = document.getElementById("cold-storage-zone-badge");
+    if (coldStorageBadgeEl) attachTooltip(coldStorageBadgeEl, TOOLTIPS.coldStorageZoneBadge.zones);
   }
 
   /* ============================================================
@@ -747,12 +739,13 @@
     })
     .catch(function () { setTextSafe("lth-value", "Data unavailable"); });
 
-  fetch("data/exchange-reserve.json")
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      var result = extractExchangeReserve(data);
-      if (result) renderExchange(result);
+  fetch('data/illiquid-supply.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var result = extractColdStorage(data);
+      if (result) renderColdStorage(result);
+      else setTextSafe('cold-storage-value', 'Data unavailable');
     })
-    .catch(function () { setTextSafe("exchange-reserve-value", "Data unavailable"); });
+    .catch(function() { setTextSafe('cold-storage-value', 'Data unavailable'); });
 
 })();
