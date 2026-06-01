@@ -40,17 +40,17 @@ jobs:
             > data/lth-position-change.json
           echo "LTH position change fetched"
 
-      - name: Fetch Exchange Reserve
+      - name: Fetch Illiquid Supply
         run: |
-          curl -s "https://api.bgeometrics.com/v1/exchange-reserve-btc?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
-            > data/exchange-reserve.json
-          echo "Exchange reserve fetched"
+          curl -s "https://api.bgeometrics.com/v1/illiquid-supply?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            > data/illiquid-supply.json
+          echo "Illiquid supply fetched"
 
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/exchange-reserve.json
+          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/illiquid-supply.json
           if git diff --quiet HEAD; then
             echo "No changes to commit."
           else
