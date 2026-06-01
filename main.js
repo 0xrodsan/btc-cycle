@@ -130,6 +130,29 @@
     return extractNumeric(raw);
   }
 
+  function extractLthValue(json) {
+    // BGeometrics: array of [date, timestamp, value]
+    if (Array.isArray(json) && json.length > 0) {
+      var last = json[json.length - 1];
+      if (Array.isArray(last)) return parseFloat(last[2]);
+      return parseFloat(last.v || last.value || last[2] || 0);
+    }
+    return null;
+  }
+
+  function extractExchangeReserve(json) {
+    // Returns { current, prev30d, changePct }
+    if (Array.isArray(json) && json.length > 30) {
+      var last = json[json.length - 1];
+      var prev = json[json.length - 31];
+      var current  = Array.isArray(last) ? parseFloat(last[2]) : parseFloat(last.v || last.value);
+      var previous = Array.isArray(prev) ? parseFloat(prev[2]) : parseFloat(prev.v || prev.value);
+      var changePct = ((current - previous) / previous) * 100;
+      return { current: current, prev30d: previous, changePct: changePct };
+    }
+    return null;
+  }
+
   /* ============================================================
      Formatting helpers
      ============================================================ */
@@ -226,6 +249,92 @@
       if (MVRV_ZONES[i].test(z)) return MVRV_ZONES[i];
     }
     return MVRV_ZONES[2]; // fallback: Fair Value
+  }
+
+  /* ============================================================
+     Zone logic — LTH Net Position Change 30d (BTC)
+     ============================================================ */
+  var LTH_ZONES = [
+    {
+      test: function (v) { return v > 300000; },
+      label: "Strong Accumulation",
+      color: "green",
+      copy: "LTH Supply growing rapidly. Smart money is accumulating heavily."
+    },
+    {
+      test: function (v) { return v > 50000; },
+      label: "Accumulation",
+      color: "blue",
+      copy: "Long-term holders are accumulating. A historically favorable signal."
+    },
+    {
+      test: function (v) { return v >= -50000; },
+      label: "Neutral",
+      color: "neutral",
+      copy: "No strong directional signal from long-term holders."
+    },
+    {
+      test: function (v) { return v >= -300000; },
+      label: "Distribution",
+      color: "amber",
+      copy: "Long-term holders are reducing exposure. Watch for further distribution."
+    },
+    {
+      test: function (v) { return v < -300000; },
+      label: "Strong Distribution",
+      color: "red",
+      copy: "Heavy distribution from long-term holders. Historically a caution zone."
+    }
+  ];
+
+  function getLthZone(value) {
+    for (var i = 0; i < LTH_ZONES.length; i++) {
+      if (LTH_ZONES[i].test(value)) return LTH_ZONES[i];
+    }
+    return LTH_ZONES[2]; // fallback: Neutral
+  }
+
+  /* ============================================================
+     Zone logic — Exchange Reserve (30d % change)
+     ============================================================ */
+  var EXCHANGE_ZONES = [
+    {
+      test: function (pct) { return pct < -2; },
+      label: "Strong Outflow",
+      color: "green",
+      copy: "Bitcoin leaving exchanges rapidly. Coins moving to cold storage — bullish."
+    },
+    {
+      test: function (pct) { return pct < -0.5; },
+      label: "Outflow",
+      color: "blue",
+      copy: "Net outflow from exchanges. Holders moving coins to self-custody."
+    },
+    {
+      test: function (pct) { return pct <= 0.5; },
+      label: "Neutral",
+      color: "neutral",
+      copy: "Exchange reserves stable. No strong directional signal."
+    },
+    {
+      test: function (pct) { return pct <= 2; },
+      label: "Inflow",
+      color: "amber",
+      copy: "Net inflow to exchanges. More BTC available for sale — watch for selling pressure."
+    },
+    {
+      test: function (pct) { return pct > 2; },
+      label: "Strong Inflow",
+      color: "red",
+      copy: "Bitcoin flowing heavily into exchanges. Historically a distribution signal."
+    }
+  ];
+
+  function getExchangeZone(pct) {
+    for (var i = 0; i < EXCHANGE_ZONES.length; i++) {
+      if (EXCHANGE_ZONES[i].test(pct)) return EXCHANGE_ZONES[i];
+    }
+    return EXCHANGE_ZONES[2]; // fallback: Neutral
   }
 
   /* ============================================================
@@ -348,6 +457,52 @@
       ? TOOLTIPS.mvrvInterpretation[zone.label]
       : zone.copy;
     setTextSafe("mvrv-interpretation", mvrvInterp);
+  }
+
+  /* ============================================================
+     Render — LTH Net Position Change block
+     ============================================================ */
+  function renderLth(value) {
+    var zone = getLthZone(value);
+    var sign = value >= 0 ? "+" : "";
+    var formatted = sign + Math.round(value).toLocaleString() + " BTC";
+    setTextSafe("lth-value", formatted);
+
+    var badge = document.getElementById("lth-zone-badge");
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = "zone-badge zone-badge--" + zone.color;
+    }
+
+    var interp = (typeof TOOLTIPS !== "undefined" &&
+                  TOOLTIPS.lthInterpretation &&
+                  TOOLTIPS.lthInterpretation[zone.label])
+      ? TOOLTIPS.lthInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe("lth-interpretation", interp);
+  }
+
+  /* ============================================================
+     Render — Exchange Reserve block
+     ============================================================ */
+  function renderExchange(data) {
+    var zone = getExchangeZone(data.changePct);
+    var sign = data.changePct >= 0 ? "+" : "";
+    setTextSafe("exchange-reserve-value", Math.round(data.current).toLocaleString() + " BTC");
+    setTextSafe("exchange-change-value", sign + data.changePct.toFixed(2) + "% (30d)");
+
+    var badge = document.getElementById("exchange-zone-badge");
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = "zone-badge zone-badge--" + zone.color;
+    }
+
+    var interp = (typeof TOOLTIPS !== "undefined" &&
+                  TOOLTIPS.exchangeInterpretation &&
+                  TOOLTIPS.exchangeInterpretation[zone.label])
+      ? TOOLTIPS.exchangeInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe("exchange-interpretation", interp);
   }
 
   /* ============================================================
@@ -552,5 +707,22 @@
     console.error("[btc-cycle] failed to load metrics:", err);
     showError("Data unavailable — will retry on next update.");
   });
+
+  // LTH and exchange fetches are independent — failures don't affect existing metrics
+  fetch("data/lth-position-change.json")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var value = extractLthValue(data);
+      if (value !== null) renderLth(value);
+    })
+    .catch(function () { setTextSafe("lth-value", "Data unavailable"); });
+
+  fetch("data/exchange-reserve.json")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var result = extractExchangeReserve(data);
+      if (result) renderExchange(result);
+    })
+    .catch(function () { setTextSafe("exchange-reserve-value", "Data unavailable"); });
 
 })();
