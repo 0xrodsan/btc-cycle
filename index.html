@@ -152,28 +152,25 @@
       </div>
 
       <!-- Block 4 — Supply in Cold Storage -->
-      <section class="metric-block" id="cold-storage-block">
-        <h2 class="metric-title">
-          <a href="https://www.bitcoinmagazinepro.com/charts/long-term-holder-supply/"
-             class="metric-title-link"
+      <div class="metric-block reveal" id="cold-storage-block" aria-labelledby="cold-storage-label">
+        <p class="metric-label" id="cold-storage-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/long-term-holder-supply/"
              target="_blank" rel="noopener">Supply in Cold Storage</a>
-        </h2>
+        </p>
 
-        <div class="metric-primary">
-          <span id="cold-storage-value" class="metric-value tooltip-trigger" tabindex="0">—</span>
-          <span id="cold-storage-change" class="metric-secondary tooltip-trigger" tabindex="0">—</span>
+        <div class="metric-value-row">
+          <span class="metric-value" id="cold-storage-value"
+                aria-label="Supply in Cold Storage" tabindex="0">—</span>
+          <span class="metric-secondary" id="cold-storage-change" tabindex="0">—</span>
         </div>
 
-        <div class="metric-meta">
-          <span class="metric-label">BTC held by illiquid entities · 30d change</span>
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="cold-storage-zone-badge" tabindex="0">—</span>
         </div>
 
-        <div class="metric-zone">
-          <span id="cold-storage-zone-badge" class="zone-badge tooltip-trigger" tabindex="0">—</span>
-        </div>
-
-        <p id="cold-storage-interpretation" class="metric-interpretation">—</p>
-      </section>
+        <p class="metric-interpretation" id="cold-storage-interpretation"></p>
+      </div>
 
       <!-- Data freshness -->
       <div class="data-freshness" aria-label="Data freshness">
