@@ -131,11 +131,13 @@
   }
 
   function extractLthValue(json) {
-    // BGeometrics: array of [date, timestamp, value]
     if (Array.isArray(json) && json.length > 0) {
       var last = json[json.length - 1];
+      if (last.lthNetPositionChange30dBtc !== undefined) {
+        return parseFloat(last.lthNetPositionChange30dBtc);
+      }
       if (Array.isArray(last)) return parseFloat(last[2]);
-      return parseFloat(last.v || last.value || last[2] || 0);
+      return parseFloat(last.v || last.value || 0);
     }
     return null;
   }
@@ -145,8 +147,13 @@
     if (Array.isArray(json) && json.length > 30) {
       var last = json[json.length - 1];
       var prev = json[json.length - 31];
-      var current  = Array.isArray(last) ? parseFloat(last[2]) : parseFloat(last.v || last.value);
-      var previous = Array.isArray(prev) ? parseFloat(prev[2]) : parseFloat(prev.v || prev.value);
+      var getVal = function (entry) {
+        if (entry.exchangeReserveBtc !== undefined) return parseFloat(entry.exchangeReserveBtc);
+        if (Array.isArray(entry)) return parseFloat(entry[2]);
+        return parseFloat(entry.v || entry.value);
+      };
+      var current  = getVal(last);
+      var previous = getVal(prev);
       var changePct = ((current - previous) / previous) * 100;
       return { current: current, prev30d: previous, changePct: changePct };
     }
