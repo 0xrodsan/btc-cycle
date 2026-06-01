@@ -34,11 +34,23 @@ jobs:
           FETCHED_AT=$(date -u +"%Y-%m-%d")
           echo "$PRICE_DATA" | jq --arg date "$FETCHED_AT" '. + {fetched_at: $date}' > data/btc-price.json
 
+      - name: Fetch LTH Net Position Change 30d
+        run: |
+          curl -s "https://api.bgeometrics.com/v1/lth-net-position-change-30d-btc?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            > data/lth-position-change.json
+          echo "LTH position change fetched"
+
+      - name: Fetch Exchange Reserve
+        run: |
+          curl -s "https://api.bgeometrics.com/v1/exchange-reserve-btc?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            > data/exchange-reserve.json
+          echo "Exchange reserve fetched"
+
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json
+          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/exchange-reserve.json
           if git diff --quiet HEAD; then
             echo "No changes to commit."
           else
