@@ -472,7 +472,7 @@
   function renderLth(value) {
     var zone = getLthZone(value);
     var sign = value >= 0 ? "+" : "";
-    var formatted = sign + Math.round(value).toLocaleString() + " BTC";
+    var formatted = sign + Math.round(value).toLocaleString("en-US") + " BTC";
     setTextSafe("lth-value", formatted);
 
     var badge = document.getElementById("lth-zone-badge");
