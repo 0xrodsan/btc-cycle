@@ -151,23 +151,29 @@
         <p class="metric-interpretation" id="lth-interpretation"></p>
       </div>
 
-      <!-- Block 4 — Exchange Reserve -->
-      <div class="metric-block reveal" aria-labelledby="exchange-label">
-        <p class="metric-label" id="exchange-label">
-          <a class="metric-title-link" href="https://cryptoquant.com/asset/btc/chart/exchange-flows/exchange-reserve?exchange=all_exchange&window=DAY&sma=0&ema=0&priceScale=log&metricScale=linear&chartStyle=line" target="_blank" rel="noopener">Exchange Reserve</a>
-        </p>
+      <!-- Block 4 — Supply in Cold Storage -->
+      <section class="metric-block" id="cold-storage-block">
+        <h2 class="metric-title">
+          <a href="https://www.bitcoinmagazinepro.com/charts/long-term-holder-supply/"
+             class="metric-title-link"
+             target="_blank" rel="noopener">Supply in Cold Storage</a>
+        </h2>
 
-        <div class="metric-value-row">
-          <span class="metric-value" id="exchange-reserve-value" aria-label="Exchange Reserve" tabindex="0">—</span>
-          <span class="metric-spot-label" id="exchange-change-value" tabindex="0">—</span>
+        <div class="metric-primary">
+          <span id="cold-storage-value" class="metric-value tooltip-trigger" tabindex="0">—</span>
+          <span id="cold-storage-change" class="metric-secondary tooltip-trigger" tabindex="0">—</span>
         </div>
 
-        <div class="metric-zone-row">
-          <span class="zone-badge zone-badge--neutral" id="exchange-zone-badge" tabindex="0">—</span>
+        <div class="metric-meta">
+          <span class="metric-label">BTC held by illiquid entities · 30d change</span>
         </div>
 
-        <p class="metric-interpretation" id="exchange-interpretation"></p>
-      </div>
+        <div class="metric-zone">
+          <span id="cold-storage-zone-badge" class="zone-badge tooltip-trigger" tabindex="0">—</span>
+        </div>
+
+        <p id="cold-storage-interpretation" class="metric-interpretation">—</p>
+      </section>
 
       <!-- Data freshness -->
       <div class="data-freshness" aria-label="Data freshness">
