@@ -619,6 +619,29 @@
 
     var mvrvBadgeEl = document.getElementById("mvrv-zone-badge");
     if (mvrvBadgeEl) attachTooltip(mvrvBadgeEl, TOOLTIPS.mvrvZoneBadge.zones);
+
+    // LTH Net Position Change tooltips
+    var lthTitle = document.querySelector("#lth-label .metric-title-link");
+    if (lthTitle) attachTooltip(lthTitle, TOOLTIPS.lthTitle.text);
+
+    var lthValueEl = document.getElementById("lth-value");
+    if (lthValueEl) attachTooltip(lthValueEl, TOOLTIPS.lthValue.text);
+
+    var lthBadgeEl = document.getElementById("lth-zone-badge");
+    if (lthBadgeEl) attachTooltip(lthBadgeEl, TOOLTIPS.lthZoneBadge.zones);
+
+    // Exchange Reserve tooltips
+    var exchangeTitle = document.querySelector("#exchange-label .metric-title-link");
+    if (exchangeTitle) attachTooltip(exchangeTitle, TOOLTIPS.exchangeTitle.text);
+
+    var exchangeReserveEl = document.getElementById("exchange-reserve-value");
+    if (exchangeReserveEl) attachTooltip(exchangeReserveEl, TOOLTIPS.exchangeReserveValue.text);
+
+    var exchangeChangeEl = document.getElementById("exchange-change-value");
+    if (exchangeChangeEl) attachTooltip(exchangeChangeEl, TOOLTIPS.exchangeChangeValue.text);
+
+    var exchangeBadgeEl = document.getElementById("exchange-zone-badge");
+    if (exchangeBadgeEl) attachTooltip(exchangeBadgeEl, TOOLTIPS.exchangeZoneBadge.zones);
   }
 
   /* ============================================================
