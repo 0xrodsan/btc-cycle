@@ -182,6 +182,71 @@ const TOOLTIPS = {
     "Neutral":             "Cold storage stable. No strong directional signal from long-term holder behavior.",
     "Distribution":        "Cold storage falling. Previously illiquid coins returning to active markets — watch for increased sell pressure.",
     "Strong Distribution": "Cold storage falling rapidly. Significant coins returning to circulation — historically a bearish signal near cycle tops."
+  },
+
+  // --- Puell Multiple ---
+  puellTitle: {
+    label: "Puell Multiple",
+    text: "Compares today's miner revenue (in USD) to the 365-day average. Below 1 means miners are earning less than usual — a historically favorable signal. Above 3 has coincided with cycle tops."
+  },
+
+  puellValue: {
+    label: "Puell Multiple value",
+    text: "Values below 0.5 have historically marked major cycle lows. Values above 3 have marked cycle tops. Current value reflects miner revenue relative to annual average."
+  },
+
+  puellZoneBadge: {
+    label: "Puell zone",
+    zones: [
+      { name: "Capitulation", color: "green",   description: "Puell below 0.5 — miners earning far below average. Historically, major cycle lows have occurred in this zone." },
+      { name: "Pressure",     color: "blue",    description: "Puell between 0.5 and 0.8 — miners below average revenue. A historically favorable zone for long-term accumulation." },
+      { name: "Neutral",      color: "neutral", description: "Puell between 0.8 and 1.5 — miner revenue near historical average. No extreme signal in either direction." },
+      { name: "Healthy",      color: "amber",   description: "Puell between 1.5 and 3.0 — miners earning above average. Market heating up; patience warranted." },
+      { name: "Euphoria",     color: "red",     description: "Puell above 3.0 — miners earning far above average. Every prior cycle top has occurred near this level." }
+    ]
+  },
+
+  puellInterpretation: {
+    "Capitulation": "Miners earning far below average — historically, major cycle lows have occurred at this level. A rare and significant accumulation signal.",
+    "Pressure":     "Miners below average revenue. Weak miners exit the market, reducing sell pressure. A historically favorable zone for long-term entry.",
+    "Neutral":      "Miner revenue near historical average. No extreme signal from the mining side of the market.",
+    "Healthy":      "Miners earning above average. Market is heating up — long-term holders tend to reduce exposure gradually in this zone.",
+    "Euphoria":     "Miners earning far above average. Every prior cycle peak has occurred near this level. Patient capital tends to reduce exposure here."
+  },
+
+  // --- Whale Balance ---
+  whaleTitle: {
+    label: "Whale Balance (>10k BTC)",
+    text: "Tracks the number of Bitcoin addresses holding more than 10,000 BTC — the largest holder cohort, typically institutions and long-term strategic investors. Rising count = whales accumulating. Falling count = whales distributing."
+  },
+
+  whaleValue: {
+    label: "Whale address count",
+    text: "The total number of addresses currently holding more than 10,000 BTC (~$700M+ at current prices). This cohort moves markets — their accumulation or distribution is one of the clearest smart-money signals available on-chain."
+  },
+
+  whaleChange: {
+    label: "1-day change",
+    text: "How many whale addresses were added or removed since yesterday. Even a change of 1-2 addresses represents hundreds of millions of dollars in BTC moving between cohorts."
+  },
+
+  whaleZoneBadge: {
+    label: "Whale activity zone",
+    zones: [
+      { name: "Strong Accumulation", color: "green",   description: "Whale count rising by more than 3 addresses in one day. Large holders actively adding to positions — a strong bullish signal." },
+      { name: "Accumulation",        color: "blue",    description: "Whale count rising. Large holders adding to positions — a positive directional signal." },
+      { name: "Neutral",             color: "neutral", description: "Whale count unchanged. No directional signal from the largest holder cohort." },
+      { name: "Distribution",        color: "amber",   description: "Whale count falling. Large holders reducing positions — watch for increased sell pressure." },
+      { name: "Strong Distribution", color: "red",     description: "Whale count falling by more than 3 addresses in one day. Large holders exiting significantly — historically a bearish signal." }
+    ]
+  },
+
+  whaleInterpretation: {
+    "Strong Accumulation": "Whale count rising fast. Large holders are actively accumulating — a historically strong bullish signal.",
+    "Accumulation":        "Whale count rising. Large holders adding to positions — a positive directional signal.",
+    "Neutral":             "Whale count unchanged. No directional signal from the largest holder cohort today.",
+    "Distribution":        "Whale count falling. Large holders reducing positions — watch for increased sell pressure.",
+    "Strong Distribution": "Whale count falling fast. Large holders exiting significantly — historically a bearish signal near cycle tops."
   }
 
 };
