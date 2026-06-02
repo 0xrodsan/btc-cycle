@@ -159,6 +159,31 @@
     return null;
   }
 
+  function extractPuell(json) {
+    if (Array.isArray(json) && json.length > 0) {
+      var last = json[json.length - 1];
+      if (Array.isArray(last)) return parseFloat(last[2]);
+      return parseFloat(last.puellMultiple || last.v || last.value || 0);
+    }
+    return null;
+  }
+
+  function extractWhaleBalance(json) {
+    if (Array.isArray(json) && json.length > 1) {
+      var last = json[json.length - 1];
+      var prev = json[json.length - 2];
+      var getVal = function(entry) {
+        if (Array.isArray(entry)) return parseInt(entry[2]);
+        return parseInt(entry.v || entry.value || 0);
+      };
+      var current = getVal(last);
+      var previous = getVal(prev);
+      var change = current - previous;
+      return { current: current, change: change };
+    }
+    return null;
+  }
+
   /* ============================================================
      Formatting helpers
      ============================================================ */
@@ -339,6 +364,82 @@
   }
 
   /* ============================================================
+     Zone logic — Puell Multiple
+     ============================================================ */
+  var PUELL_ZONES = [
+    {
+      test: function(v) { return v < 0.5; },
+      label: "Capitulation", color: "green",
+      copy: "Miners earning well below average. Historically marks cycle lows."
+    },
+    {
+      test: function(v) { return v < 0.8; },
+      label: "Pressure", color: "blue",
+      copy: "Miners below average revenue. A historically favorable zone for accumulation."
+    },
+    {
+      test: function(v) { return v < 1.5; },
+      label: "Neutral", color: "neutral",
+      copy: "Miner revenue near historical average. No extreme signal."
+    },
+    {
+      test: function(v) { return v < 3.0; },
+      label: "Healthy", color: "amber",
+      copy: "Miners earning above average. Market heating up."
+    },
+    {
+      test: function(v) { return v >= 3.0; },
+      label: "Euphoria", color: "red",
+      copy: "Miners earning far above average. Historically coincides with cycle tops."
+    }
+  ];
+
+  function getPuellZone(value) {
+    for (var i = 0; i < PUELL_ZONES.length; i++) {
+      if (PUELL_ZONES[i].test(value)) return PUELL_ZONES[i];
+    }
+    return PUELL_ZONES[2];
+  }
+
+  /* ============================================================
+     Zone logic — Whale Balance (>10k BTC, 1d change)
+     ============================================================ */
+  var WHALE_ZONES = [
+    {
+      test: function(change) { return change > 3; },
+      label: "Strong Accumulation", color: "green",
+      copy: "Whale count rising fast. Large holders actively accumulating."
+    },
+    {
+      test: function(change) { return change > 0; },
+      label: "Accumulation", color: "blue",
+      copy: "Whale count rising. Large holders adding to positions."
+    },
+    {
+      test: function(change) { return change === 0; },
+      label: "Neutral", color: "neutral",
+      copy: "Whale count unchanged. No directional signal from large holders."
+    },
+    {
+      test: function(change) { return change >= -3; },
+      label: "Distribution", color: "amber",
+      copy: "Whale count falling. Large holders reducing positions."
+    },
+    {
+      test: function(change) { return change < -3; },
+      label: "Strong Distribution", color: "red",
+      copy: "Whale count falling fast. Large holders exiting significantly."
+    }
+  ];
+
+  function getWhaleZone(change) {
+    for (var i = 0; i < WHALE_ZONES.length; i++) {
+      if (WHALE_ZONES[i].test(change)) return WHALE_ZONES[i];
+    }
+    return WHALE_ZONES[2];
+  }
+
+  /* ============================================================
      Premium/Discount label builder
      ============================================================ */
   function premiumLabel(premiumPct) {
@@ -505,6 +606,46 @@
   }
 
   /* ============================================================
+     Render — Puell Multiple block
+     ============================================================ */
+  function renderPuell(value) {
+    var zone = getPuellZone(value);
+    setTextSafe('puell-value', value.toFixed(2));
+    var badge = document.getElementById('puell-zone-badge');
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = 'zone-badge zone-badge--' + zone.color;
+    }
+    var interp = (typeof TOOLTIPS !== 'undefined' &&
+                  TOOLTIPS.puellInterpretation &&
+                  TOOLTIPS.puellInterpretation[zone.label])
+      ? TOOLTIPS.puellInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe('puell-interpretation', interp);
+  }
+
+  /* ============================================================
+     Render — Whale Balance block
+     ============================================================ */
+  function renderWhaleBalance(data) {
+    var zone = getWhaleZone(data.change);
+    var sign = data.change > 0 ? '+' : '';
+    setTextSafe('whale-value', data.current.toLocaleString('en-US') + ' addresses');
+    setTextSafe('whale-change', sign + data.change + ' (1d)');
+    var badge = document.getElementById('whale-zone-badge');
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = 'zone-badge zone-badge--' + zone.color;
+    }
+    var interp = (typeof TOOLTIPS !== 'undefined' &&
+                  TOOLTIPS.whaleInterpretation &&
+                  TOOLTIPS.whaleInterpretation[zone.label])
+      ? TOOLTIPS.whaleInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe('whale-interpretation', interp);
+  }
+
+  /* ============================================================
      Tooltip system — single instance, mobile-safe
      ============================================================ */
   var tooltipEl = document.createElement("div");
@@ -641,6 +782,29 @@
 
     var coldStorageBadgeEl = document.getElementById("cold-storage-zone-badge");
     if (coldStorageBadgeEl) attachTooltip(coldStorageBadgeEl, TOOLTIPS.coldStorageZoneBadge.zones);
+
+    // Puell Multiple tooltips
+    var puellTitle = document.querySelector("#puell-label .metric-title-link");
+    if (puellTitle) attachTooltip(puellTitle, TOOLTIPS.puellTitle.text);
+
+    var puellValueEl = document.getElementById("puell-value");
+    if (puellValueEl) attachTooltip(puellValueEl, TOOLTIPS.puellValue.text);
+
+    var puellBadgeEl = document.getElementById("puell-zone-badge");
+    if (puellBadgeEl) attachTooltip(puellBadgeEl, TOOLTIPS.puellZoneBadge.zones);
+
+    // Whale Balance tooltips
+    var whaleTitle = document.querySelector("#whale-label .metric-title-link");
+    if (whaleTitle) attachTooltip(whaleTitle, TOOLTIPS.whaleTitle.text);
+
+    var whaleValueEl = document.getElementById("whale-value");
+    if (whaleValueEl) attachTooltip(whaleValueEl, TOOLTIPS.whaleValue.text);
+
+    var whaleChangeEl = document.getElementById("whale-change");
+    if (whaleChangeEl) attachTooltip(whaleChangeEl, TOOLTIPS.whaleChange.text);
+
+    var whaleBadgeEl = document.getElementById("whale-zone-badge");
+    if (whaleBadgeEl) attachTooltip(whaleBadgeEl, TOOLTIPS.whaleZoneBadge.zones);
   }
 
   /* ============================================================
@@ -747,5 +911,23 @@
       else setTextSafe('cold-storage-value', 'Data unavailable');
     })
     .catch(function() { setTextSafe('cold-storage-value', 'Data unavailable'); });
+
+  fetch('data/puell-multiple.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var value = extractPuell(data);
+      if (value !== null) renderPuell(value);
+      else setTextSafe('puell-value', 'Data unavailable');
+    })
+    .catch(function() { setTextSafe('puell-value', 'Data unavailable'); });
+
+  fetch('data/whale-balance.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var result = extractWhaleBalance(data);
+      if (result) renderWhaleBalance(result);
+      else setTextSafe('whale-value', 'Data unavailable');
+    })
+    .catch(function() { setTextSafe('whale-value', 'Data unavailable'); });
 
 })();
