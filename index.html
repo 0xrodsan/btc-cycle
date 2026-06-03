@@ -89,6 +89,30 @@
       <p class="hero-subtitle">On-chain signals for long-term holders.</p>
     </section>
 
+    <!-- Cycle Score -->
+    <section class="cycle-score-section" id="cycle-score-container" aria-label="Aggregate cycle reading">
+      <div class="cycle-score-header">
+        <span class="cycle-score-label">Cycle Reading</span>
+        <span class="zone-badge zone-badge--neutral" id="cycle-score-badge">—</span>
+      </div>
+      <div class="cycle-score-bar" id="cycle-score-bar">
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+      </div>
+      <p class="cycle-score-count" id="cycle-score-count">— of 6 signals favorable</p>
+
+      <!-- AI Analysis -->
+      <div class="ai-analysis-section">
+        <button class="ai-analysis-btn" id="ai-analysis-btn" type="button">
+          Generate cycle analysis
+        </button>
+        <p class="ai-analysis-output" id="ai-analysis-output"></p>
+      </div>
+    </section>
+
     <!-- Metrics -->
     <section class="metrics-section" aria-label="On-chain metrics">
 
@@ -241,6 +265,8 @@
   </footer>
 
   <script src="tooltips.js"></script>
+  <script src="cycleScore.js"></script>
+  <script src="aiAnalysis.js"></script>
   <script src="main.js" defer></script>
 </body>
 </html>
