@@ -43,7 +43,7 @@ async function generateAnalysis() {
   var data = getCurrentCycleData();
 
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch('https://btc-cycle-proxy.0xrodsan.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
