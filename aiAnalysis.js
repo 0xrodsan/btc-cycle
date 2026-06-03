@@ -35,39 +35,27 @@ async function generateAnalysis() {
   var output = document.getElementById('ai-analysis-output');
   if (!btn || !output) return;
 
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
-  output.textContent = '';
-  output.classList.remove('visible');
+  // Analysis is pre-generated daily by GitHub Action
+  // Just show/hide the static text
+  if (output.classList.contains('visible')) {
+    output.classList.remove('visible');
+    btn.textContent = 'Show cycle analysis';
+    return;
+  }
 
-  var data = getCurrentCycleData();
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
 
   try {
-    var response = await fetch('https://btc-cycle-proxy.0xrodsan.workers.dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: buildAnalysisPrompt(data)
-        }]
-      })
-    });
-
-    var result = await response.json();
-    var text = result.content && result.content[0] && result.content[0].text
-      ? result.content[0].text
-      : 'Analysis unavailable at this time.';
-
-    output.textContent = text;
+    var response = await fetch('data/analysis.json', { cache: 'no-store' });
+    var data = await response.json();
+    output.textContent = data.analysis || 'Analysis unavailable.';
     output.classList.add('visible');
-    btn.textContent = 'Regenerate analysis';
+    btn.textContent = 'Hide analysis';
   } catch (err) {
-    output.textContent = 'Analysis unavailable. Please try again later.';
+    output.textContent = 'Analysis unavailable.';
     output.classList.add('visible');
-    btn.textContent = 'Try again';
+    btn.textContent = 'Hide analysis';
   } finally {
     btn.disabled = false;
   }
