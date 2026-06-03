@@ -440,6 +440,23 @@
   }
 
   /* ============================================================
+     Cycle score — shared state, populated by each render function
+     ============================================================ */
+  var _cycleZones = {};
+  var _cycleValues = {};
+
+  function tryUpdateCycleScore() {
+    if (typeof updateCycleScore !== 'function') return;
+    var z = _cycleZones;
+    if (z.realized && z.mvrv && z.lth && z.coldStorage && z.puell && z.whale) {
+      updateCycleScore(
+        [z.realized, z.mvrv, z.lth, z.coldStorage, z.puell, z.whale],
+        _cycleValues
+      );
+    }
+  }
+
+  /* ============================================================
      Premium/Discount label builder
      ============================================================ */
   function premiumLabel(premiumPct) {
@@ -536,6 +553,11 @@
       ? TOOLTIPS.realizedPriceInterpretation[zone.label]
       : zone.copy;
     setTextSafe("rp-interpretation", rpInterp);
+
+    _cycleZones.realized = zone.label;
+    _cycleValues.realizedZone = zone.label;
+    _cycleValues.realizedPremium = premiumPct.toFixed(1);
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -559,6 +581,11 @@
       ? TOOLTIPS.mvrvInterpretation[zone.label]
       : zone.copy;
     setTextSafe("mvrv-interpretation", mvrvInterp);
+
+    _cycleZones.mvrv = zone.label;
+    _cycleValues.mvrvZone = zone.label;
+    _cycleValues.mvrvValue = zScore.toFixed(2);
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -582,6 +609,11 @@
       ? TOOLTIPS.lthInterpretation[zone.label]
       : zone.copy;
     setTextSafe("lth-interpretation", interp);
+
+    _cycleZones.lth = zone.label;
+    _cycleValues.lthZone = zone.label;
+    _cycleValues.lthValue = formatted;
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -603,6 +635,11 @@
       ? TOOLTIPS.coldStorageInterpretation[zone.label]
       : zone.copy;
     setTextSafe('cold-storage-interpretation', interp);
+
+    _cycleZones.coldStorage = zone.label;
+    _cycleValues.coldStorageZone = zone.label;
+    _cycleValues.coldStorageChange = data.changePct.toFixed(2);
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -622,6 +659,11 @@
       ? TOOLTIPS.puellInterpretation[zone.label]
       : zone.copy;
     setTextSafe('puell-interpretation', interp);
+
+    _cycleZones.puell = zone.label;
+    _cycleValues.puellZone = zone.label;
+    _cycleValues.puellValue = value.toFixed(2);
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -643,6 +685,11 @@
       ? TOOLTIPS.whaleInterpretation[zone.label]
       : zone.copy;
     setTextSafe('whale-interpretation', interp);
+
+    _cycleZones.whale = zone.label;
+    _cycleValues.whaleZone = zone.label;
+    _cycleValues.whaleChange = data.change;
+    tryUpdateCycleScore();
   }
 
   /* ============================================================
@@ -929,5 +976,10 @@
       else setTextSafe('whale-value', 'Data unavailable');
     })
     .catch(function() { setTextSafe('whale-value', 'Data unavailable'); });
+
+  var aiBtn = document.getElementById('ai-analysis-btn');
+  if (aiBtn) {
+    aiBtn.addEventListener('click', generateAnalysis);
+  }
 
 })();
