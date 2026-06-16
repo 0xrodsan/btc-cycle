@@ -977,9 +977,4 @@
     })
     .catch(function() { setTextSafe('whale-value', 'Data unavailable'); });
 
-  var aiBtn = document.getElementById('ai-analysis-btn');
-  if (aiBtn) {
-    aiBtn.addEventListener('click', generateAnalysis);
-  }
-
 })();
