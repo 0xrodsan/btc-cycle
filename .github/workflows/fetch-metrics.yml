@@ -115,20 +115,22 @@ jobs:
 
           PROMPT="You are a Bitcoin on-chain analyst writing for long-term investors. Write a single paragraph (4-6 sentences, max 120 words) analyzing the current Bitcoin market cycle based on these metrics: Realized Price premium: ${REALIZED}% above cost basis. MVRV Z-Score: ${MVRV}. LTH Net Position Change 30d: ${LTH} BTC. Supply in Cold Storage 30d change: ${COLD}%. Puell Multiple: ${PUELL}. Whale Balance 1d change: ${WHALE} addresses. Start with the aggregate reading. Mention 2-3 specific metrics with values. Use plain language with technical context in parentheses where useful. Be honest about uncertainty. Do not give price targets. End with what this configuration has historically implied for patient long-term investors."
 
-          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+          echo "Calling Anthropic API..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" https://api.anthropic.com/v1/messages \
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
-            -d "{\"model\":\"claude-haiku-4-5-20251001\",\"max_tokens\":200,\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}]}")
+            -d "{\"model\":\"claude-haiku-4-5-20251001\",\"max_tokens\":200,\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one sentence.\"}]}")
 
-          echo "$RESPONSE" | python3 -c "
-          import json, sys
-          data = json.load(sys.stdin)
-          text = data.get('content', [{}])[0].get('text', 'Analysis unavailable.')
-          output = {'analysis': text, 'generated_at': '$(date -u +%Y-%m-%d)'}
-          print(json.dumps(output))
-          " > data/analysis.json 2>/dev/null || echo '{"analysis":"Analysis unavailable.","generated_at":""}' > data/analysis.json
+          echo "Raw response: $RESPONSE"
 
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS:/d')
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Body: $BODY"
+
+          echo '{"analysis":"Debug mode.","generated_at":"debug"}' > data/analysis.json
           echo "AI analysis generated"
 
       - name: Commit if changed
