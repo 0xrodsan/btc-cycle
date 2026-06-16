@@ -169,9 +169,9 @@
   }
 
   function extractWhaleBalance(json) {
-    if (Array.isArray(json) && json.length > 1) {
+    if (Array.isArray(json) && json.length > 30) {
       var last = json[json.length - 1];
-      var prev = json[json.length - 2];
+      var prev = json[json.length - 31];
       var getVal = function(entry) {
         if (Array.isArray(entry)) return parseInt(entry[2]);
         return parseInt(entry.v || entry.value || 0);
@@ -402,33 +402,33 @@
   }
 
   /* ============================================================
-     Zone logic — Whale Balance (>10k BTC, 1d change)
+     Zone logic — Whale Balance (>10k BTC, 30d change)
      ============================================================ */
   var WHALE_ZONES = [
     {
-      test: function(change) { return change > 3; },
+      test: function(change) { return change > 5; },
       label: "Strong Accumulation", color: "green",
-      copy: "Whale count rising fast. Large holders actively accumulating."
+      copy: "Whale count rising significantly over 30 days. Large holders actively accumulating."
     },
     {
       test: function(change) { return change > 0; },
       label: "Accumulation", color: "blue",
-      copy: "Whale count rising. Large holders adding to positions."
+      copy: "Whale count rising over 30 days. Large holders adding to positions."
     },
     {
       test: function(change) { return change === 0; },
       label: "Neutral", color: "neutral",
-      copy: "Whale count unchanged. No directional signal from large holders."
+      copy: "Whale count unchanged over 30 days. No directional signal from large holders."
     },
     {
-      test: function(change) { return change >= -3; },
+      test: function(change) { return change >= -5; },
       label: "Distribution", color: "amber",
-      copy: "Whale count falling. Large holders reducing positions."
+      copy: "Whale count falling over 30 days. Large holders reducing positions."
     },
     {
-      test: function(change) { return change < -3; },
+      test: function(change) { return change < -5; },
       label: "Strong Distribution", color: "red",
-      copy: "Whale count falling fast. Large holders exiting significantly."
+      copy: "Whale count falling significantly over 30 days. Large holders exiting."
     }
   ];
 
@@ -673,7 +673,7 @@
     var zone = getWhaleZone(data.change);
     var sign = data.change > 0 ? '+' : '';
     setTextSafe('whale-value', data.current.toLocaleString('en-US') + ' addresses');
-    setTextSafe('whale-change', sign + data.change + ' (1d)');
+    setTextSafe('whale-change', sign + data.change + ' (30d)');
     var badge = document.getElementById('whale-zone-badge');
     if (badge) {
       badge.textContent = zone.label;

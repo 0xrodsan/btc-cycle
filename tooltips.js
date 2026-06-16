@@ -226,18 +226,18 @@ const TOOLTIPS = {
   },
 
   whaleChange: {
-    label: "1-day change",
-    text: "How many whale addresses were added or removed since yesterday. Even a change of 1-2 addresses represents hundreds of millions of dollars in BTC moving between cohorts."
+    label: "30d change",
+    text: "How many whale addresses (>10k BTC) were added or removed over the last 30 days. Even a change of 1-2 addresses represents hundreds of millions of dollars in BTC."
   },
 
   whaleZoneBadge: {
     label: "Whale activity zone",
     zones: [
-      { name: "Strong Accumulation", color: "green",   description: "Whale count rising by more than 3 addresses in one day. Large holders actively adding to positions — a strong bullish signal." },
-      { name: "Accumulation",        color: "blue",    description: "Whale count rising. Large holders adding to positions — a positive directional signal." },
-      { name: "Neutral",             color: "neutral", description: "Whale count unchanged. No directional signal from the largest holder cohort." },
-      { name: "Distribution",        color: "amber",   description: "Whale count falling. Large holders reducing positions — watch for increased sell pressure." },
-      { name: "Strong Distribution", color: "red",     description: "Whale count falling by more than 3 addresses in one day. Large holders exiting significantly — historically a bearish signal." }
+      { name: "Strong Accumulation", color: "green",   description: "Whale count rising by more than 5 addresses over 30 days. Large holders actively adding to positions — a strong bullish signal." },
+      { name: "Accumulation",        color: "blue",    description: "Whale count rising over 30 days. Large holders adding to positions — a positive directional signal." },
+      { name: "Neutral",             color: "neutral", description: "Whale count unchanged over 30 days. No directional signal from the largest holder cohort." },
+      { name: "Distribution",        color: "amber",   description: "Whale count falling over 30 days. Large holders reducing positions — watch for increased sell pressure." },
+      { name: "Strong Distribution", color: "red",     description: "Whale count falling by more than 5 addresses over 30 days. Large holders exiting significantly — historically a bearish signal." }
     ]
   },
 
