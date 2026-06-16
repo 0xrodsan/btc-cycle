@@ -58,86 +58,11 @@ jobs:
             > data/whale-balance.json
           echo "Whale balance fetched"
 
-      - name: Generate AI cycle analysis
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          # Read latest metric values from fetched JSON files
-          REALIZED=$(python3 -c "
-          import json, sys
-          data = json.load(open('data/realized-price.json'))
-          last = data[-1]
-          print(last[2] if isinstance(last, list) else last.get('realizedPrice', 0))
-          " 2>/dev/null || echo "0")
-
-          MVRV=$(python3 -c "
-          import json
-          data = json.load(open('data/mvrv-zscore.json'))
-          last = data[-1]
-          print(last[2] if isinstance(last, list) else last.get('mvrvZscore', 0))
-          " 2>/dev/null || echo "0")
-
-          LTH=$(python3 -c "
-          import json
-          data = json.load(open('data/lth-position-change.json'))
-          last = data[-1]
-          print(last[2] if isinstance(last, list) else last.get('lthNetPositionChange30dBtc', 0))
-          " 2>/dev/null || echo "0")
-
-          COLD=$(python3 -c "
-          import json
-          data = json.load(open('data/illiquid-supply.json'))
-          if len(data) > 30:
-            cur = data[-1][2] if isinstance(data[-1], list) else 0
-            prev = data[-31][2] if isinstance(data[-31], list) else 0
-            print(round((cur - prev) / prev * 100, 2) if prev else 0)
-          else:
-            print(0)
-          " 2>/dev/null || echo "0")
-
-          PUELL=$(python3 -c "
-          import json
-          data = json.load(open('data/puell-multiple.json'))
-          last = data[-1]
-          print(last[2] if isinstance(last, list) else last.get('puellMultiple', 0))
-          " 2>/dev/null || echo "0")
-
-          WHALE=$(python3 -c "
-          import json
-          data = json.load(open('data/whale-balance.json'))
-          if len(data) >= 2:
-            cur = data[-1][2] if isinstance(data[-1], list) else 0
-            prev = data[-2][2] if isinstance(data[-2], list) else 0
-            print(int(cur) - int(prev))
-          else:
-            print(0)
-          " 2>/dev/null || echo "0")
-
-          PROMPT="You are a Bitcoin on-chain analyst writing for long-term investors. Write a single paragraph (4-6 sentences, max 120 words) analyzing the current Bitcoin market cycle based on these metrics: Realized Price premium: ${REALIZED}% above cost basis. MVRV Z-Score: ${MVRV}. LTH Net Position Change 30d: ${LTH} BTC. Supply in Cold Storage 30d change: ${COLD}%. Puell Multiple: ${PUELL}. Whale Balance 1d change: ${WHALE} addresses. Start with the aggregate reading. Mention 2-3 specific metrics with values. Use plain language with technical context in parentheses where useful. Be honest about uncertainty. Do not give price targets. End with what this configuration has historically implied for patient long-term investors."
-
-          echo "Calling Anthropic API..."
-          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" https://api.anthropic.com/v1/messages \
-            -H "Content-Type: application/json" \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -d "{\"model\":\"claude-haiku-4-5-20251001\",\"max_tokens\":200,\"messages\":[{\"role\":\"user\",\"content\":\"Say hello in one sentence.\"}]}")
-
-          echo "Raw response: $RESPONSE"
-
-          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
-          BODY=$(echo "$RESPONSE" | sed '/HTTP_STATUS:/d')
-
-          echo "HTTP Status: $HTTP_STATUS"
-          echo "Body: $BODY"
-
-          echo '{"analysis":"Debug mode.","generated_at":"debug"}' > data/analysis.json
-          echo "AI analysis generated"
-
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/illiquid-supply.json data/puell-multiple.json data/whale-balance.json data/analysis.json
+          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/illiquid-supply.json data/puell-multiple.json data/whale-balance.json
           if git diff --quiet HEAD; then
             echo "No changes to commit."
           else
