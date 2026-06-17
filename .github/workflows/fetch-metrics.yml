@@ -42,23 +42,9 @@ jobs:
 
       - name: Fetch Illiquid Supply
         run: |
-          NEW=$(curl -s "https://api.bgeometrics.com/v1/illiquid-supply?token=${{ secrets.BGEOMETRICS_API_KEY }}" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-if isinstance(data, list) and len(data) > 0:
-    last = data[-1]
-    print(json.dumps(last))
-" 2>/dev/null)
+          NEW=$(curl -s "https://api.bgeometrics.com/v1/illiquid-supply?token=${{ secrets.BGEOMETRICS_API_KEY }}" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps(d[-1])) if isinstance(d,list) and d else None' 2>/dev/null)
           if [ -n "$NEW" ] && [ -f "data/illiquid-supply.json" ]; then
-            python3 -c "
-import json, sys
-existing = json.load(open('data/illiquid-supply.json'))
-new_entry = json.loads('$NEW')
-if not existing or existing[-1][0] != new_entry[0]:
-    existing.append(new_entry)
-existing = existing[-60:]
-print(json.dumps(existing, indent=2))
-" > data/illiquid-supply.tmp && mv data/illiquid-supply.tmp data/illiquid-supply.json
+            python3 -c 'import json,sys; n=json.loads(sys.argv[1]); e=json.load(open(sys.argv[2])); e=(e if e and e[-1][0]==n[0] else e+[n])[-60:]; print(json.dumps(e,indent=2))' "$NEW" "data/illiquid-supply.json" > data/illiquid-supply.tmp && mv data/illiquid-supply.tmp data/illiquid-supply.json
           else
             curl -s "https://api.bgeometrics.com/v1/illiquid-supply?token=${{ secrets.BGEOMETRICS_API_KEY }}" > data/illiquid-supply.json
           fi
@@ -72,25 +58,9 @@ print(json.dumps(existing, indent=2))
 
       - name: Fetch Whale Balance
         run: |
-          NEW=$(curl -s "https://api.bgeometrics.com/v1/balance-addr-10K-BTC?token=${{ secrets.BGEOMETRICS_API_KEY }}" | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-if isinstance(data, list) and len(data) > 0:
-    last = data[-1]
-    print(json.dumps(last))
-" 2>/dev/null)
+          NEW=$(curl -s "https://api.bgeometrics.com/v1/balance-addr-10K-BTC?token=${{ secrets.BGEOMETRICS_API_KEY }}" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps(d[-1])) if isinstance(d,list) and d else None' 2>/dev/null)
           if [ -n "$NEW" ] && [ -f "data/whale-balance.json" ]; then
-            python3 -c "
-import json, sys
-existing = json.load(open('data/whale-balance.json'))
-new_entry = json.loads('$NEW')
-# Avoid duplicates by checking last entry date
-if not existing or existing[-1][0] != new_entry[0]:
-    existing.append(new_entry)
-# Keep last 60 entries max
-existing = existing[-60:]
-print(json.dumps(existing, indent=2))
-" > data/whale-balance.tmp && mv data/whale-balance.tmp data/whale-balance.json
+            python3 -c 'import json,sys; n=json.loads(sys.argv[1]); e=json.load(open(sys.argv[2])); e=(e if e and e[-1][0]==n[0] else e+[n])[-60:]; print(json.dumps(e,indent=2))' "$NEW" "data/whale-balance.json" > data/whale-balance.tmp && mv data/whale-balance.tmp data/whale-balance.json
           else
             curl -s "https://api.bgeometrics.com/v1/balance-addr-10K-BTC?token=${{ secrets.BGEOMETRICS_API_KEY }}" > data/whale-balance.json
           fi
