@@ -585,9 +585,11 @@
      ============================================================ */
   function renderLth(value) {
     var zone = getLthZone(value);
-    var sign = value >= 0 ? "+" : "";
+    var sign = value >= 0 ? "↑ +" : "↓ ";
     var formatted = sign + Math.round(value).toLocaleString("en-US") + " BTC";
     setTextSafe("lth-value", formatted);
+    var lthEl = document.getElementById('lth-value');
+    if (lthEl) lthEl.style.color = value >= 0 ? '#1a9e5c' : '#9e2a2a';
 
     var badge = document.getElementById("lth-zone-badge");
     if (badge) {
@@ -613,9 +615,11 @@
      ============================================================ */
   function renderColdStorage(data) {
     var zone = getColdStorageZone(data.changePct);
-    var sign = data.changePct >= 0 ? '+' : '';
+    var sign = data.changePct >= 0 ? '↑ +' : '↓ ';
     setTextSafe('cold-storage-value', Math.round(data.current).toLocaleString('en-US') + ' BTC');
     setTextSafe('cold-storage-change', sign + data.changePct.toFixed(2) + '% (30d)');
+    var changeEl = document.getElementById('cold-storage-change');
+    if (changeEl) changeEl.className = 'metric-secondary ' + (data.changePct >= 0 ? 'direction-up' : 'direction-down');
     var badge = document.getElementById('cold-storage-zone-badge');
     if (badge) {
       badge.textContent = zone.label;
@@ -663,9 +667,11 @@
      ============================================================ */
   function renderWhaleBalance(data) {
     var zone = getWhaleZone(data.change);
-    var sign = data.change > 0 ? '+' : '';
+    var sign = data.change > 0 ? '↑ +' : (data.change < 0 ? '↓ ' : '');
     setTextSafe('whale-value', data.current.toLocaleString('en-US') + ' addresses');
     setTextSafe('whale-change', sign + data.change + ' (30d)');
+    var whaleChangeEl = document.getElementById('whale-change');
+    if (whaleChangeEl) whaleChangeEl.className = 'metric-secondary ' + (data.change > 0 ? 'direction-up' : data.change < 0 ? 'direction-down' : 'direction-flat');
     var badge = document.getElementById('whale-zone-badge');
     if (badge) {
       badge.textContent = zone.label;

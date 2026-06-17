@@ -458,6 +458,11 @@ svg {
 .color-amber       { color: var(--zone-amber-text); }
 .color-red         { color: var(--zone-red-text); }
 
+/* Direction indicators for change values */
+.direction-up   { color: #1a9e5c; }
+.direction-down { color: #9e2a2a; }
+.direction-flat { color: var(--color-text-muted); }
+
 .metric-zone-row {
   display: flex;
   align-items: center;
