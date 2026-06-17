@@ -494,9 +494,8 @@
   /* ============================================================
      Freshness line
      ============================================================ */
-  function renderFreshness(rpDate, mvrvDate, isLive) {
+  function renderFreshness(rpDate, mvrvDate) {
     var date = rpDate || mvrvDate;
-    var freshnessEl = document.querySelector(".data-freshness");
 
     var dateStr = "";
     if (date) {
@@ -514,14 +513,7 @@
       });
     }
 
-    if (freshnessEl) {
-      var liveSuffix = isLive ? " · BTC price: live" : "";
-      freshnessEl.innerHTML = "On-chain data updated daily · Last update: <span id=\"last-update\">"
-        + dateStr + "</span>" + liveSuffix;
-    } else {
-      var el = document.getElementById("last-update");
-      if (el) el.textContent = dateStr;
-    }
+    setTextSafe("last-update", dateStr);
   }
 
   /* ============================================================
@@ -930,7 +922,7 @@
 
       renderRealizedPrice(rpValue, btcPrice);
       renderMvrv(zScore);
-      renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw), isLive);
+      renderFreshness(extractDate(rpRaw), extractDate(mvrvRaw));
 
       // Attach tooltips after data has rendered
       attachAllTooltips(zScore);
