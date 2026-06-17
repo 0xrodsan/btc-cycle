@@ -199,8 +199,8 @@ const TOOLTIPS = {
     label: "Puell zone",
     zones: [
       { name: "Capitulation", color: "green",   description: "Puell below 0.5 — miners earning far below average. Historically, major cycle lows have occurred in this zone." },
-      { name: "Pressure",     color: "blue",    description: "Puell between 0.5 and 0.8 — miners below average revenue. A historically favorable zone for long-term accumulation." },
-      { name: "Neutral",      color: "neutral", description: "Puell between 0.8 and 1.5 — miner revenue near historical average. No extreme signal in either direction." },
+      { name: "Pressure",     color: "blue",    description: "Puell between 0.5 and 1.0 — miners below average revenue. Below the break-even historical mean — a favorable zone for long-term accumulation." },
+      { name: "Neutral",      color: "neutral", description: "Puell between 1.0 and 1.5 — miner revenue near historical average. No extreme signal in either direction." },
       { name: "Healthy",      color: "amber",   description: "Puell between 1.5 and 3.0 — miners earning above average. Market heating up; patience warranted." },
       { name: "Euphoria",     color: "red",     description: "Puell above 3.0 — miners earning far above average. Every prior cycle top has occurred near this level." }
     ]

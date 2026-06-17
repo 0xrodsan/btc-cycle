@@ -373,7 +373,7 @@
       copy: "Miners earning well below average. Historically marks cycle lows."
     },
     {
-      test: function(v) { return v < 0.8; },
+      test: function(v) { return v < 1.0; },
       label: "Pressure", color: "blue",
       copy: "Miners below average revenue. A historically favorable zone for accumulation."
     },
