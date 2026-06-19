@@ -757,6 +757,54 @@ svg {
   margin-bottom: 0.75rem;
 }
 
+.cycle-score-icons {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+  padding: 0 0.25rem;
+}
+
+.score-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: default;
+  outline: none;
+}
+
+.score-icon-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, transform 0.15s ease;
+}
+
+.score-icon:hover .score-icon-dot,
+.score-icon:focus .score-icon-dot {
+  transform: scale(1.3);
+}
+
+.score-icon-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+.score-icon-dot--empty   { background-color: #2a2a2a; }
+.score-icon-dot--green   { background-color: #1a9e5c; }
+.score-icon-dot--blue    { background-color: #2a6db5; }
+.score-icon-dot--neutral { background-color: #4a4a4a; }
+.score-icon-dot--amber   { background-color: #b07d2a; }
+.score-icon-dot--red     { background-color: #9e2a2a; }
+
+@media (max-width: 420px) {
+  .score-icon-label { display: none; }
+  .cycle-score-icons { justify-content: center; gap: 1.1rem; }
+}
+
 .cycle-score-label {
   font-size: 0.78rem;
   text-transform: uppercase;
