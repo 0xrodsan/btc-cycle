@@ -3,7 +3,6 @@
 
 var ZONE_SCORES = {
   // Strongly bullish
-  "Deep Accumulation":  5,
   "Strong Accumulation": 5,
   "Capitulation":       5,
   // Bullish

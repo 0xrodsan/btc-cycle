@@ -28,7 +28,7 @@ const TOOLTIPS = {
 
   premiumDiscount: {
     label: "Premium / Discount",
-    text: "How far the current market price is above the average holder's cost basis. Zones: below 0% = Deep Accumulation · 0–25% = Accumulation · 25–75% = Fair Value · 75–150% = Caution · above 150% = Distribution."
+    text: "How far the current market price is above the average holder's cost basis. Zones: below 0% = Strong Accumulation · 0–25% = Accumulation · 25–75% = Fair Value · 75–150% = Caution · above 150% = Distribution."
   },
 
   // --- MVRV Z-Score data points ---
@@ -42,7 +42,7 @@ const TOOLTIPS = {
     label: "Current zone",
     zones: [
       {
-        name: "Deep Accumulation",
+        name: "Strong Accumulation",
         color: "green",
         description: "Market price is below the average cost basis (negative premium). Historically the rarest zone — every major cycle low has occurred here."
       },
@@ -73,7 +73,7 @@ const TOOLTIPS = {
     label: "Current zone",
     zones: [
       {
-        name: "Deep Accumulation",
+        name: "Strong Accumulation",
         color: "green",
         description: "Z-Score below 0.5 — statistically rare. Every major cycle low has occurred at or below this level."
       },
@@ -103,7 +103,7 @@ const TOOLTIPS = {
   // --- Interpretive sentences (one per zone, per metric) ---
   // Realized Price interpretations
   realizedPriceInterpretation: {
-    "Deep Accumulation": "Historically, this is where patient capital accumulates. Major cycle lows have occurred at this level.",
+    "Strong Accumulation": "Historically, this is where patient capital accumulates. Major cycle lows have occurred at this level.",
     "Accumulation":      "Market is modestly above average cost basis. A historically favorable zone for long-term entry.",
     "Fair Value":        "No extreme signal. The market is near its historical equilibrium — neither cheap nor expensive.",
     "Caution":           "The market is running above historical norms. Long-term holders are in significant profit — watch for distribution.",
@@ -112,7 +112,7 @@ const TOOLTIPS = {
 
   // MVRV Z-Score interpretations
   mvrvInterpretation: {
-    "Deep Accumulation": "Z-Score in historically rare territory. Every major cycle low has occurred at this level.",
+    "Strong Accumulation": "Z-Score in historically rare territory. Every major cycle low has occurred at this level.",
     "Accumulation":      "Z-Score below the historical average. A historically favorable zone for long-term entry.",
     "Fair Value":        "Z-Score near the historical mean. No extreme signal in either direction.",
     "Caution":           "Z-Score stretching above historical norms. Elevated unrealized profit across the market.",

@@ -202,7 +202,7 @@
   var RP_ZONES = [
     {
       test: function (prem) { return prem < 0; },
-      label: "Deep Accumulation",
+      label: "Strong Accumulation",
       color: "green",
       copy: "BTC is trading below the average cost basis of all holders — historically, a rare and significant accumulation zone."
     },
@@ -245,7 +245,7 @@
   var MVRV_ZONES = [
     {
       test: function (z) { return z < 0.5; },
-      label: "Deep Accumulation",
+      label: "Strong Accumulation",
       color: "green",
       copy: "Z-Score in historically rare undervaluation territory. Major cycle lows have occurred in this zone."
     },
@@ -446,7 +446,6 @@
   var _cycleValues = {};
 
   var ZONE_TO_ICON_COLOR = {
-    "Deep Accumulation":   "green",
     "Strong Accumulation": "green",
     "Capitulation":        "green",
     "Accumulation":        "blue",
