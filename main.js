@@ -445,6 +445,43 @@
   var _cycleZones = {};
   var _cycleValues = {};
 
+  var ZONE_TO_ICON_COLOR = {
+    "Deep Accumulation":   "green",
+    "Strong Accumulation": "green",
+    "Capitulation":        "green",
+    "Accumulation":        "blue",
+    "Pressure":            "blue",
+    "Strong Outflow":      "blue",
+    "Outflow":             "blue",
+    "Fair Value":          "neutral",
+    "Neutral":             "neutral",
+    "Caution":             "amber",
+    "Healthy":             "amber",
+    "Inflow":              "amber",
+    "Distribution":        "amber",
+    "Strong Distribution": "red",
+    "Euphoria":            "red",
+    "Strong Inflow":       "red"
+  };
+
+  function updateScoreIcons(metricZoneMap) {
+    Object.keys(metricZoneMap).forEach(function(metric) {
+      var iconEl = document.querySelector('.score-icon[data-metric="' + metric + '"] .score-icon-dot');
+      if (!iconEl) return;
+      var color = ZONE_TO_ICON_COLOR[metricZoneMap[metric]] || 'neutral';
+      iconEl.className = 'score-icon-dot score-icon-dot--' + color;
+    });
+  }
+
+  function attachIconTooltips(metricZoneMap, metricNames) {
+    Object.keys(metricZoneMap).forEach(function(metric) {
+      var iconEl = document.querySelector('.score-icon[data-metric="' + metric + '"]');
+      if (!iconEl) return;
+      var label = metricNames[metric] + ': ' + metricZoneMap[metric];
+      attachTooltip(iconEl, label);
+    });
+  }
+
   function tryUpdateCycleScore() {
     if (typeof updateCycleScore !== 'function') return;
     var z = _cycleZones;
@@ -453,6 +490,23 @@
         [z.realized, z.mvrv, z.lth, z.coldStorage, z.puell, z.whale],
         _cycleValues
       );
+      var iconZoneMap = {
+        realized:       z.realized,
+        mvrv:           z.mvrv,
+        lth:            z.lth,
+        'cold-storage': z.coldStorage,
+        puell:          z.puell,
+        whale:          z.whale
+      };
+      updateScoreIcons(iconZoneMap);
+      attachIconTooltips(iconZoneMap, {
+        realized:       'Realized Price',
+        mvrv:           'MVRV Z-Score',
+        lth:            'LTH Net Position Change',
+        'cold-storage': 'Supply in Cold Storage',
+        puell:          'Puell Multiple',
+        whale:          'Whale Balance'
+      });
     }
   }
 
