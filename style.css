@@ -607,6 +607,15 @@ svg {
   pointer-events: none;
 }
 
+.footer-disclaimer {
+  font-size: 0.7rem;
+  color: #333;
+  margin: 0.25rem auto 0.75rem;
+  line-height: 1.4;
+  max-width: var(--max-width);
+  padding: 0 1.25rem;
+}
+
 /* ============================================================
    Tooltip triggers — dotted underline signals "more info"
    ============================================================ */
