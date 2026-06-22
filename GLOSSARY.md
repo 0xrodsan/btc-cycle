@@ -251,7 +251,55 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 
 ## Iteration 3 — Miner & whale activity
 
-*To be filled when Iteration 3 begins. Planned entries: Puell Multiple, Hash Ribbons, Accumulation Trend Score, entity clustering.*
+### Puell Multiple
+
+**Plain language**: Compares what Bitcoin miners are earning today (in USD) to what they earned on average over the past year. A value below 1 means miners are earning less than their historical average — they are under financial pressure. A value above 3 means they are earning far more than usual.
+
+**Technical**: `Puell Multiple = Daily miner issuance value (USD) / 365-day moving average of daily issuance value (USD)`. Created by analyst David Puell.
+
+**Why it matters**: Miners are structural sellers — they must sell BTC to pay for electricity and hardware. When the Puell Multiple is very low, the least efficient miners shut down or sell reserves at a loss, removing sell pressure from the market. When it is very high, miners are incentivized to sell more, adding sell pressure.
+
+**Historical context**:
+- Capitulation zone (< 0.5): reached at cycle lows in 2011, 2015, 2018, and 2022 — each time preceded significant recoveries
+- Euphoria zone (> 3.0): the 2013, 2017, and 2021 cycle tops all saw the Puell Multiple spike into this territory before major corrections
+
+**Zone thresholds in `btc-cycle`**:
+- Strong Accumulation / Capitulation: < 0.5
+- Pressure (Accumulation): 0.5 to 1.0
+- Neutral: 1.0 to 1.5
+- Healthy (Caution): 1.5 to 3.0
+- Euphoria (Distribution): > 3.0
+
+**Note on calibration**: the Pressure zone was expanded from `< 0.8` to `< 1.0` after observing that values between 0.8 and 1.0 still represent miners earning below their historical average — classifying this as "Neutral" was misleading.
+
+**Endpoint**: `https://api.bgeometrics.com/v1/puell-multiple`
+**Reference chart**: https://www.bitcoinmagazinepro.com/charts/puell-multiple/
+
+---
+
+### Whale Balance (>10k BTC)
+
+**Plain language**: The number of Bitcoin addresses that currently hold more than 10,000 BTC. These are the largest holders — institutions, funds, and long-term strategic investors. When this number rises, the biggest players are accumulating. When it falls, they are distributing.
+
+**Technical**: Count of unique addresses with a balance ≥ 10,000 BTC at the last daily snapshot. The signal used in `btc-cycle` is the 30-day change in this count — not the absolute number.
+
+**Why it matters**: Even a change of 1-2 addresses in this cohort represents hundreds of millions of dollars moving between holding and active positions. It is one of the most direct proxies for institutional accumulation or distribution behavior.
+
+**Why 30d change (not 1d)**: Daily change in whale count is extremely noisy — a single large wallet splitting or merging can show ±5 on any given day. The 30-day trend filters this noise and reveals the directional behavior of the cohort.
+
+**Zone thresholds in `btc-cycle`** (30d change):
+- Strong Accumulation: > +5 addresses
+- Accumulation: 0 to +5 addresses
+- Neutral: 0
+- Distribution: -5 to 0 addresses
+- Strong Distribution: < -5 addresses
+
+**Data note**: Uses append strategy in GitHub Action — new daily entry appended to historical file rather than overwriting. Minimum 31 entries required to calculate 30d change. File capped at 60 entries.
+
+**Accumulation Trend Score note**: Originally planned for Iteration 3. The BGeometrics endpoint `accumulation-trend-score` returns HTTP 500 (persistent server error). Whale Balance is used as a direct proxy — it captures the same underlying behavior (institutional accumulation/distribution) from a different angle.
+
+**Endpoint**: `https://api.bgeometrics.com/v1/balance-addr-10K-BTC`
+**Reference chart**: https://charts.bgeometrics.com/distribution_coin_humpback_dark.html
 
 ---
 
@@ -271,6 +319,7 @@ Entries marked 🚧 are still being absorbed and should be reviewed.
 
 *Things I'm not yet sure about — to revisit as understanding grows.*
 
-- [ ] How exactly is the StdDev window calculated in MVRV Z-Score? Full history or rolling?
-- [ ] Does BGeometrics expose entity-adjusted metrics, or only raw address-level data?
-- [x] At what age threshold does a UTXO transition from "Short-Term Holder" to "Long-Term Holder"? → **155 days** (confirmed in Iteration 2)
+- [x] How exactly is the StdDev window calculated in MVRV Z-Score? → Uses full historical data, not rolling window
+- [x] Does BGeometrics expose entity-adjusted metrics? → Yes, but some require paid plan (exchange flows, accumulation trend score)
+- [x] At what age threshold does a UTXO transition from STH to LTH? → 155 days (confirmed)
+- [ ] Accumulation Trend Score (`accumulation-trend-score`) returns HTTP 500 on BGeometrics — monitor for fix in future iterations
