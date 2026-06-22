@@ -27,6 +27,25 @@
   }
 
   /* ============================================================
+     Simple / Detailed view toggle
+     ============================================================ */
+  var btnDetailed = document.getElementById('btn-detailed');
+  var btnSimple = document.getElementById('btn-simple');
+
+  if (btnDetailed && btnSimple) {
+    btnDetailed.addEventListener('click', function() {
+      document.body.classList.remove('simple-mode');
+      btnDetailed.classList.add('view-toggle-btn--active');
+      btnSimple.classList.remove('view-toggle-btn--active');
+    });
+    btnSimple.addEventListener('click', function() {
+      document.body.classList.add('simple-mode');
+      btnSimple.classList.add('view-toggle-btn--active');
+      btnDetailed.classList.remove('view-toggle-btn--active');
+    });
+  }
+
+  /* ============================================================
      Mobile menu
      ============================================================ */
   var menuToggle = document.querySelector(".menu-toggle");
