@@ -126,6 +126,14 @@
           <span class="score-icon-dot score-icon-dot--empty"></span>
           <span class="score-icon-label">Whale</span>
         </div>
+        <div class="score-icon" data-metric="sopr" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">SOPR</span>
+        </div>
+        <div class="score-icon" data-metric="nupl" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">NUPL</span>
+        </div>
       </div>
 
       <div class="cycle-score-bar" id="cycle-score-bar">
@@ -135,7 +143,7 @@
         <span class="score-segment score-segment--empty"></span>
         <span class="score-segment score-segment--empty"></span>
       </div>
-      <p class="cycle-score-count" id="cycle-score-count">— of 6 signals favorable</p>
+      <p class="cycle-score-count" id="cycle-score-count">— of 8 signals favorable</p>
 
     </section>
 
@@ -144,7 +152,7 @@
       <summary class="how-to-read-summary">How to read this dashboard</summary>
       <div class="how-to-read-content">
         <p><strong>What this tool shows</strong><br>
-        Six on-chain metrics that describe where Bitcoin sits in its long-term market cycle.
+        Eight on-chain metrics that describe where Bitcoin sits in its long-term market cycle.
         On-chain data reads the Bitcoin blockchain directly — it reflects what holders are
         actually doing with their coins, not what they say they will do.</p>
 
@@ -158,7 +166,7 @@
           <li><span class="how-to-zone how-to-zone--red">●</span> <strong>Red</strong> — historically a distribution / cycle top zone</li>
         </ul>
 
-        <p><strong>The six metrics</strong><br>
+        <p><strong>The eight metrics</strong><br>
         <strong>Realized Price</strong> — the average price all Bitcoin holders paid for their coins.
         When the market price drops below this, most holders are sitting on losses — historically a rare and significant signal.<br><br>
         <strong>MVRV Z-Score</strong> — measures how far above or below the average cost basis the market is,
@@ -170,10 +178,14 @@
         <strong>Puell Multiple</strong> — compares today's miner revenue to the annual average.
         Below 1.0 = miners under pressure, historically favorable. Above 3.0 = miners in euphoria, historically a top signal.<br><br>
         <strong>Whale Balance</strong> — number of addresses holding more than 10,000 BTC.
-        Rising count = largest holders accumulating. Falling = distributing.</p>
+        Rising count = largest holders accumulating. Falling = distributing.<br><br>
+        <strong>SOPR</strong> — Spent Output Profit Ratio. Measures whether coins being moved today are in profit or loss.
+        Below 1.0 = coins moving at a loss (capitulation). Above 1.0 = coins moving at a profit (distribution).<br><br>
+        <strong>NUPL</strong> — Net Unrealized Profit/Loss as a fraction of market cap.
+        Negative = most holders underwater (historically a strong accumulation signal). Above 0.75 = near-peak euphoria.</p>
 
         <p><strong>Cycle Reading</strong><br>
-        The bar at the top combines all six signals into one aggregate reading.
+        The bar at the top combines all eight signals into one aggregate reading.
         It is a descriptive tool — it tells you where the market has historically been,
         not where it is going. Past patterns do not guarantee future results.</p>
 
@@ -304,6 +316,46 @@
         </div>
 
         <p class="metric-interpretation" id="whale-interpretation"></p>
+      </div>
+
+      <!-- Block 7 — SOPR -->
+      <div class="metric-block reveal" id="sopr-block" aria-labelledby="sopr-label">
+        <p class="metric-label" id="sopr-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/sopr/"
+             target="_blank" rel="noopener">SOPR</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="sopr-value"
+                aria-label="SOPR" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="sopr-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="sopr-interpretation"></p>
+      </div>
+
+      <!-- Block 8 — NUPL -->
+      <div class="metric-block reveal" id="nupl-block" aria-labelledby="nupl-label">
+        <p class="metric-label" id="nupl-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/nupl/"
+             target="_blank" rel="noopener">NUPL</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="nupl-value"
+                aria-label="NUPL" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="nupl-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="nupl-interpretation"></p>
       </div>
 
       <!-- Data freshness -->
