@@ -66,11 +66,23 @@ jobs:
           fi
           echo "Whale balance updated"
 
+      - name: Fetch SOPR
+        run: |
+          curl -s "https://api.bgeometrics.com/v1/sopr?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            > data/sopr.json
+          echo "SOPR fetched"
+
+      - name: Fetch NUPL
+        run: |
+          curl -s "https://api.bgeometrics.com/v1/nupl?token=${{ secrets.BGEOMETRICS_API_KEY }}" \
+            > data/nupl.json
+          echo "NUPL fetched"
+
       - name: Commit if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/illiquid-supply.json data/puell-multiple.json data/whale-balance.json
+          git add data/realized-price.json data/mvrv-zscore.json data/btc-price.json data/lth-position-change.json data/illiquid-supply.json data/puell-multiple.json data/whale-balance.json data/sopr.json data/nupl.json
           if git diff --quiet HEAD; then
             echo "No changes to commit."
           else
