@@ -44,7 +44,7 @@ const TOOLTIPS = {
       {
         name: "Strong Accumulation",
         color: "green",
-        description: "Market price is below the average cost basis (negative premium). Historically the rarest zone — every major cycle low has occurred here."
+        description: "Market price is below the average cost basis (negative premium). Historically the rarest zone — cycle lows occurred here in Jan 2015 (~$150), Dec 2018 (~$3,200), and Nov 2022 (~$15,500)."
       },
       {
         name: "Accumulation",
@@ -64,7 +64,7 @@ const TOOLTIPS = {
       {
         name: "Distribution",
         color: "red",
-        description: "Market price is more than 150% above the average cost basis. Every prior cycle peak occurred in or near this zone."
+        description: "Market price is more than 150% above the average cost basis. Every prior cycle peak occurred in or near this zone — Dec 2017 (~$20k), Nov 2021 (~$69k)."
       }
     ]
   },
@@ -75,7 +75,7 @@ const TOOLTIPS = {
       {
         name: "Strong Accumulation",
         color: "green",
-        description: "Z-Score below 0.5 — statistically rare. Every major cycle low has occurred at or below this level."
+        description: "Z-Score below 0.5 — statistically rare. Cycle lows occurred at this level in May 2015, Dec 2018, and Nov 2022. Buying during these periods has historically produced outsized returns."
       },
       {
         name: "Accumulation",
@@ -95,7 +95,7 @@ const TOOLTIPS = {
       {
         name: "Distribution",
         color: "red",
-        description: "Z-Score above 6.0 — historically extreme. Every prior cycle peak occurred in or near this zone."
+        description: "Z-Score above 6.0 — historically extreme. Z-Score exceeded 7 at the 2017 (~$20k) and 2021 (~$69k) cycle tops, signaling overvaluation before major corrections."
       }
     ]
   },
@@ -198,11 +198,11 @@ const TOOLTIPS = {
   puellZoneBadge: {
     label: "Puell zone",
     zones: [
-      { name: "Capitulation", color: "green",   description: "Puell below 0.5 — miners earning far below average. Historically, major cycle lows have occurred in this zone." },
+      { name: "Capitulation", color: "green",   description: "Puell below 0.5 — miners earning far below average. This level was reached at the cycle lows of 2011, 2015, 2018, and 2022, each time preceding significant recoveries." },
       { name: "Pressure",     color: "blue",    description: "Puell between 0.5 and 1.0 — miners below average revenue. Below the break-even historical mean — a favorable zone for long-term accumulation." },
       { name: "Neutral",      color: "neutral", description: "Puell between 1.0 and 1.5 — miner revenue near historical average. No extreme signal in either direction." },
       { name: "Healthy",      color: "amber",   description: "Puell between 1.5 and 3.0 — miners earning above average. Market heating up; patience warranted." },
-      { name: "Euphoria",     color: "red",     description: "Puell above 3.0 — miners earning far above average. Every prior cycle top has occurred near this level." }
+      { name: "Euphoria",     color: "red",     description: "Puell above 3.0 — miners earning far above average. The 2013, 2017, and 2021 cycle tops all saw the Puell Multiple spike into this zone before major corrections." }
     ]
   },
 
