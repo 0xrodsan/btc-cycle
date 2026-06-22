@@ -203,6 +203,24 @@
     return null;
   }
 
+  function extractSopr(json) {
+    if (Array.isArray(json) && json.length > 0) {
+      var last = json[json.length - 1];
+      if (Array.isArray(last)) return parseFloat(last[2]);
+      return parseFloat(last.sopr || last.v || last.value || 0);
+    }
+    return null;
+  }
+
+  function extractNupl(json) {
+    if (Array.isArray(json) && json.length > 0) {
+      var last = json[json.length - 1];
+      if (Array.isArray(last)) return parseFloat(last[2]);
+      return parseFloat(last.nupl || last.v || last.value || 0);
+    }
+    return null;
+  }
+
   /* ============================================================
      Formatting helpers
      ============================================================ */
@@ -459,6 +477,82 @@
   }
 
   /* ============================================================
+     Zone logic — SOPR (Spent Output Profit Ratio)
+     ============================================================ */
+  var SOPR_ZONES = [
+    {
+      test: function(v) { return v < 0.85; },
+      label: "Strong Accumulation", color: "green",
+      copy: "SOPR deep below 1 — coins are being spent at a significant loss. Historically marks capitulation and major cycle lows."
+    },
+    {
+      test: function(v) { return v < 1.0; },
+      label: "Accumulation", color: "blue",
+      copy: "SOPR below 1 — the average spent coin is sold at a loss. A historically favorable zone for accumulation."
+    },
+    {
+      test: function(v) { return v < 1.1; },
+      label: "Neutral", color: "neutral",
+      copy: "SOPR near 1 — coins are being moved near their cost basis. No strong directional signal."
+    },
+    {
+      test: function(v) { return v < 1.3; },
+      label: "Distribution", color: "amber",
+      copy: "SOPR above 1 — the average spent coin is in profit. Market participants are taking gains."
+    },
+    {
+      test: function(v) { return v >= 1.3; },
+      label: "Strong Distribution", color: "red",
+      copy: "SOPR significantly above 1 — heavy profit-taking. Historically coincides with late-cycle distribution and tops."
+    }
+  ];
+
+  function getSoprZone(value) {
+    for (var i = 0; i < SOPR_ZONES.length; i++) {
+      if (SOPR_ZONES[i].test(value)) return SOPR_ZONES[i];
+    }
+    return SOPR_ZONES[2];
+  }
+
+  /* ============================================================
+     Zone logic — NUPL (Net Unrealized Profit/Loss)
+     ============================================================ */
+  var NUPL_ZONES = [
+    {
+      test: function(v) { return v < 0; },
+      label: "Capitulation", color: "green",
+      copy: "NUPL negative — the market is in aggregate unrealized loss. Historically a rare and significant accumulation opportunity."
+    },
+    {
+      test: function(v) { return v < 0.25; },
+      label: "Accumulation", color: "blue",
+      copy: "NUPL in low positive territory — modest unrealized profit across the market. A historically favorable zone before broader price discovery."
+    },
+    {
+      test: function(v) { return v < 0.5; },
+      label: "Neutral", color: "neutral",
+      copy: "NUPL at moderate levels — the market carries reasonable unrealized profit. No extreme signal in either direction."
+    },
+    {
+      test: function(v) { return v < 0.75; },
+      label: "Distribution", color: "amber",
+      copy: "NUPL elevated — significant unrealized profit across the market. Historically a zone where distribution begins."
+    },
+    {
+      test: function(v) { return v >= 0.75; },
+      label: "Strong Distribution", color: "red",
+      copy: "NUPL near maximum — nearly all holders are in significant profit. Each prior cycle peak reached or approached this zone."
+    }
+  ];
+
+  function getNuplZone(value) {
+    for (var i = 0; i < NUPL_ZONES.length; i++) {
+      if (NUPL_ZONES[i].test(value)) return NUPL_ZONES[i];
+    }
+    return NUPL_ZONES[2];
+  }
+
+  /* ============================================================
      Cycle score — shared state, populated by each render function
      ============================================================ */
   var _cycleZones = {};
@@ -503,9 +597,9 @@
   function tryUpdateCycleScore() {
     if (typeof updateCycleScore !== 'function') return;
     var z = _cycleZones;
-    if (z.realized && z.mvrv && z.lth && z.coldStorage && z.puell && z.whale) {
+    if (z.realized && z.mvrv && z.lth && z.coldStorage && z.puell && z.whale && z.sopr && z.nupl) {
       updateCycleScore(
-        [z.realized, z.mvrv, z.lth, z.coldStorage, z.puell, z.whale],
+        [z.realized, z.mvrv, z.lth, z.coldStorage, z.puell, z.whale, z.sopr, z.nupl],
         _cycleValues
       );
       var iconZoneMap = {
@@ -514,7 +608,9 @@
         lth:            z.lth,
         'cold-storage': z.coldStorage,
         puell:          z.puell,
-        whale:          z.whale
+        whale:          z.whale,
+        sopr:           z.sopr,
+        nupl:           z.nupl
       };
       updateScoreIcons(iconZoneMap);
       attachIconTooltips(iconZoneMap, {
@@ -523,7 +619,9 @@
         lth:            'LTH Net Position Change',
         'cold-storage': 'Supply in Cold Storage',
         puell:          'Puell Multiple',
-        whale:          'Whale Balance'
+        whale:          'Whale Balance',
+        sopr:           'SOPR',
+        nupl:           'NUPL'
       });
     }
   }
@@ -763,6 +861,54 @@
   }
 
   /* ============================================================
+     Render — SOPR block
+     ============================================================ */
+  function renderSopr(value) {
+    var zone = getSoprZone(value);
+    setTextSafe('sopr-value', value.toFixed(3));
+    var badge = document.getElementById('sopr-zone-badge');
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = 'zone-badge zone-badge--' + zone.color;
+    }
+    var interp = (typeof TOOLTIPS !== 'undefined' &&
+                  TOOLTIPS.soprInterpretation &&
+                  TOOLTIPS.soprInterpretation[zone.label])
+      ? TOOLTIPS.soprInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe('sopr-interpretation', interp);
+
+    _cycleZones.sopr = zone.label;
+    _cycleValues.soprZone = zone.label;
+    _cycleValues.soprValue = value.toFixed(3);
+    tryUpdateCycleScore();
+  }
+
+  /* ============================================================
+     Render — NUPL block
+     ============================================================ */
+  function renderNupl(value) {
+    var zone = getNuplZone(value);
+    setTextSafe('nupl-value', value.toFixed(3));
+    var badge = document.getElementById('nupl-zone-badge');
+    if (badge) {
+      badge.textContent = zone.label;
+      badge.className = 'zone-badge zone-badge--' + zone.color;
+    }
+    var interp = (typeof TOOLTIPS !== 'undefined' &&
+                  TOOLTIPS.nuplInterpretation &&
+                  TOOLTIPS.nuplInterpretation[zone.label])
+      ? TOOLTIPS.nuplInterpretation[zone.label]
+      : zone.copy;
+    setTextSafe('nupl-interpretation', interp);
+
+    _cycleZones.nupl = zone.label;
+    _cycleValues.nuplZone = zone.label;
+    _cycleValues.nuplValue = value.toFixed(3);
+    tryUpdateCycleScore();
+  }
+
+  /* ============================================================
      Tooltip system — single instance, mobile-safe
      ============================================================ */
   var tooltipEl = document.createElement("div");
@@ -922,6 +1068,26 @@
 
     var whaleBadgeEl = document.getElementById("whale-zone-badge");
     if (whaleBadgeEl) attachTooltip(whaleBadgeEl, TOOLTIPS.whaleZoneBadge.zones);
+
+    // SOPR tooltips
+    var soprTitle = document.querySelector("#sopr-label .metric-title-link");
+    if (soprTitle) attachTooltip(soprTitle, TOOLTIPS.soprTitle.text);
+
+    var soprValueEl = document.getElementById("sopr-value");
+    if (soprValueEl) attachTooltip(soprValueEl, TOOLTIPS.soprValue.text);
+
+    var soprBadgeEl = document.getElementById("sopr-zone-badge");
+    if (soprBadgeEl) attachTooltip(soprBadgeEl, TOOLTIPS.soprZoneBadge.zones);
+
+    // NUPL tooltips
+    var nuplTitle = document.querySelector("#nupl-label .metric-title-link");
+    if (nuplTitle) attachTooltip(nuplTitle, TOOLTIPS.nuplTitle.text);
+
+    var nuplValueEl = document.getElementById("nupl-value");
+    if (nuplValueEl) attachTooltip(nuplValueEl, TOOLTIPS.nuplValue.text);
+
+    var nuplBadgeEl = document.getElementById("nupl-zone-badge");
+    if (nuplBadgeEl) attachTooltip(nuplBadgeEl, TOOLTIPS.nuplZoneBadge.zones);
   }
 
   /* ============================================================
@@ -1046,5 +1212,23 @@
       else setTextSafe('whale-value', 'Data unavailable');
     })
     .catch(function() { setTextSafe('whale-value', 'Data unavailable'); });
+
+  fetch('data/sopr.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var value = extractSopr(data);
+      if (value !== null) renderSopr(value);
+      else setTextSafe('sopr-value', 'Data unavailable');
+    })
+    .catch(function() { setTextSafe('sopr-value', 'Data unavailable'); });
+
+  fetch('data/nupl.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var value = extractNupl(data);
+      if (value !== null) renderNupl(value);
+      else setTextSafe('nupl-value', 'Data unavailable');
+    })
+    .catch(function() { setTextSafe('nupl-value', 'Data unavailable'); });
 
 })();
