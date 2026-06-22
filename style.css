@@ -879,3 +879,76 @@ body.simple-mode .metric-value-row {
   color: #555;
   margin: 0 0 1.25rem;
 }
+
+/* ── How to read accordion ───────────────────────────────── */
+.how-to-read {
+  margin-bottom: 2rem;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+}
+
+.how-to-read-summary {
+  padding: 0.9rem 1.25rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: #666;
+  letter-spacing: 0.04em;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.how-to-read-summary::-webkit-details-marker { display: none; }
+
+.how-to-read-summary::before {
+  content: '›';
+  font-size: 1rem;
+  color: #444;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.how-to-read[open] .how-to-read-summary::before {
+  transform: rotate(90deg);
+}
+
+.how-to-read-summary:hover {
+  color: #999;
+}
+
+.how-to-read-content {
+  padding: 0 1.25rem 1.25rem;
+  font-size: 0.83rem;
+  line-height: 1.7;
+  color: #888;
+  border-top: 1px solid #1a1a1a;
+}
+
+.how-to-read-content p {
+  margin: 0.9rem 0 0;
+}
+
+.how-to-read-content ul {
+  margin: 0.5rem 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.how-to-read-content li {
+  margin: 0.3rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.how-to-zone {
+  font-size: 0.7rem;
+}
+
+.how-to-zone--green   { color: #1a9e5c; }
+.how-to-zone--blue    { color: #2a6db5; }
+.how-to-zone--neutral { color: #4a4a4a; }
+.how-to-zone--amber   { color: #b07d2a; }
+.how-to-zone--red     { color: #9e2a2a; }
