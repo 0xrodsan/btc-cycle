@@ -247,6 +247,66 @@ const TOOLTIPS = {
     "Neutral":             "Whale count unchanged. No directional signal from the largest holder cohort today.",
     "Distribution":        "Whale count falling. Large holders reducing positions — watch for increased sell pressure.",
     "Strong Distribution": "Whale count falling fast. Large holders exiting significantly — historically a bearish signal near cycle tops."
+  },
+
+  // --- SOPR ---
+  soprTitle: {
+    label: "SOPR",
+    text: "Spent Output Profit Ratio — measures whether coins being moved today are, on average, in profit or in loss. A value below 1 means the average spent coin was sold at a loss (capitulation). Above 1 means profit-taking."
+  },
+
+  soprValue: {
+    label: "SOPR value",
+    text: "Values consistently below 1 have historically marked cycle lows — holders are selling at a loss, signaling capitulation. Values persistently above 1.2 have coincided with distribution phases near cycle tops."
+  },
+
+  soprZoneBadge: {
+    label: "SOPR zone",
+    zones: [
+      { name: "Strong Accumulation", color: "green",   description: "SOPR below 0.85 — coins are being spent at a significant loss. Deep capitulation. This level has historically marked major cycle lows (2015, 2018, 2022)." },
+      { name: "Accumulation",        color: "blue",    description: "SOPR between 0.85 and 1.0 — average spent coin is sold at a loss. Historically a favorable zone for patient accumulation before recovery." },
+      { name: "Neutral",             color: "neutral", description: "SOPR between 1.0 and 1.1 — coins moving near cost basis. Market in equilibrium with no strong directional signal." },
+      { name: "Distribution",        color: "amber",   description: "SOPR between 1.1 and 1.3 — coins moving at a profit. Market participants taking gains; watch for increased sell pressure." },
+      { name: "Strong Distribution", color: "red",     description: "SOPR above 1.3 — heavy profit-taking. Historically coincides with late-cycle distribution phases and cycle tops." }
+    ]
+  },
+
+  soprInterpretation: {
+    "Strong Accumulation": "SOPR deep below 1 — coins are being spent at a significant loss. Historically, this level of capitulation marks major cycle lows.",
+    "Accumulation":        "SOPR below 1 — average spent coin is sold at a loss. Historically a favorable signal before market recoveries.",
+    "Neutral":             "SOPR near 1 — coins moving near cost basis. No strong directional signal from on-chain spending behavior.",
+    "Distribution":        "SOPR above 1 — profit-taking underway. Market participants are realizing gains; watch for distribution pressure.",
+    "Strong Distribution": "SOPR significantly above 1 — heavy profit-taking. This level has historically coincided with late-cycle distribution and tops."
+  },
+
+  // --- NUPL ---
+  nuplTitle: {
+    label: "NUPL",
+    text: "Net Unrealized Profit/Loss — the total unrealized profit minus unrealized loss across all Bitcoin holders, expressed as a fraction of market cap. Ranges from -1 (everyone underwater) to +1 (everyone in profit). A powerful macro sentiment gauge."
+  },
+
+  nuplValue: {
+    label: "NUPL value",
+    text: "Negative NUPL means the market is in aggregate unrealized loss — historically a rare and strong accumulation signal. Values above 0.75 have coincided with euphoric cycle tops."
+  },
+
+  nuplZoneBadge: {
+    label: "NUPL zone",
+    zones: [
+      { name: "Capitulation",        color: "green",   description: "NUPL below 0 — the market is in aggregate unrealized loss. This has historically been the most reliable long-term accumulation signal, occurring at the lows of 2015, 2018–19, and late 2022." },
+      { name: "Accumulation",        color: "blue",    description: "NUPL between 0 and 0.25 — low unrealized profit. Early recovery phase. A historically favorable zone for long-term entry before broader price discovery." },
+      { name: "Neutral",             color: "neutral", description: "NUPL between 0.25 and 0.5 — moderate unrealized profit. Market in mid-cycle territory with no extreme signal in either direction." },
+      { name: "Distribution",        color: "amber",   description: "NUPL between 0.5 and 0.75 — elevated unrealized profit. Historically, the zone where distribution begins as holders take gains." },
+      { name: "Strong Distribution", color: "red",     description: "NUPL above 0.75 — near-peak euphoria. Every prior cycle top has reached or approached this zone, including Dec 2017 and Nov 2021." }
+    ]
+  },
+
+  nuplInterpretation: {
+    "Capitulation":        "NUPL negative — the market is in aggregate unrealized loss. Historically the strongest long-term accumulation signal available on-chain.",
+    "Accumulation":        "NUPL in low positive territory — modest unrealized profit across the market. A historically favorable zone before broader price discovery.",
+    "Neutral":             "NUPL at moderate levels — the market carries reasonable unrealized profit. No extreme signal in either direction.",
+    "Distribution":        "NUPL elevated — significant unrealized profit across the market. Distribution historically begins at this level.",
+    "Strong Distribution": "NUPL near maximum — near-peak euphoria. Every prior cycle top occurred at or near this level. Patient capital tends to reduce exposure here."
   }
 
 };
