@@ -2,6 +2,19 @@
   "use strict";
 
   /* ============================================================
+     Data path base — resolved from this script's own URL, not the
+     page URL. main.js is shared between / and /pt/ (loaded via
+     "../main.js" from the PT page), so page-relative fetches like
+     "data/x.json" would 404 once loaded from /pt/. Anchoring to
+     document.currentScript.src keeps every fetch pointed at the
+     one shared data/ directory regardless of which page loaded it.
+     ============================================================ */
+  var DATA_BASE = (function () {
+    var src = document.currentScript ? document.currentScript.src : "main.js";
+    return src.replace(/main\.js(\?.*)?(#.*)?$/, "") + "data/";
+  })();
+
+  /* ============================================================
      Populate hrefs from SITE config
      ============================================================ */
   if (typeof SITE !== "undefined") {
@@ -222,7 +235,8 @@
   }
 
   /* ============================================================
-     Formatting helpers
+     Formatting helpers — numbers always render in EN format
+     (1,234.56), regardless of page language.
      ============================================================ */
   function formatUSD(n) {
     return "$" + Math.round(n).toLocaleString("en-US");
@@ -234,39 +248,28 @@
   }
 
   /* ============================================================
+     i18n helpers
+     Each zone carries a stable `key` (language-agnostic identity)
+     used to look up its display label and interpretation copy.
+     Only `zone.color` drives CSS classes — never translated text.
+     ============================================================ */
+  function zoneLabel(zone) {
+    return I18N.t("zones." + zone.key);
+  }
+
+  function metricInterpretation(metricKey, zone) {
+    return I18N.t("metrics." + metricKey + ".interpretation." + zone.key);
+  }
+
+  /* ============================================================
      Zone logic — Realized Price
      ============================================================ */
   var RP_ZONES = [
-    {
-      test: function (prem) { return prem < 0; },
-      label: "Strong Accumulation",
-      color: "green",
-      copy: "BTC is trading below the average cost basis of all holders — historically, a rare and significant accumulation zone."
-    },
-    {
-      test: function (prem) { return prem >= 0 && prem < 25; },
-      label: "Accumulation",
-      color: "blue",
-      copy: "BTC is slightly above aggregate cost basis. Long-term holders are generally in modest profit."
-    },
-    {
-      test: function (prem) { return prem >= 25 && prem < 75; },
-      label: "Fair Value",
-      color: "neutral",
-      copy: "BTC trades in line with historical cost basis norms. No extreme signal in either direction."
-    },
-    {
-      test: function (prem) { return prem >= 75 && prem < 150; },
-      label: "Caution",
-      color: "amber",
-      copy: "The market is running significantly above aggregate cost basis. Historically, a zone for patience."
-    },
-    {
-      test: function (prem) { return prem >= 150; },
-      label: "Distribution",
-      color: "red",
-      copy: "BTC is far above aggregate cost basis. Past cycles show this as a distribution zone for patient capital."
-    }
+    { key: "strongAccumulation", test: function (prem) { return prem < 0; },                     color: "green"   },
+    { key: "accumulation",       test: function (prem) { return prem >= 0 && prem < 25; },        color: "blue"    },
+    { key: "fairValue",          test: function (prem) { return prem >= 25 && prem < 75; },       color: "neutral" },
+    { key: "caution",            test: function (prem) { return prem >= 75 && prem < 150; },      color: "amber"   },
+    { key: "distribution",       test: function (prem) { return prem >= 150; },                   color: "red"     }
   ];
 
   function getRealizedPriceZone(premiumPct) {
@@ -280,36 +283,11 @@
      Zone logic — MVRV Z-Score
      ============================================================ */
   var MVRV_ZONES = [
-    {
-      test: function (z) { return z < 0.5; },
-      label: "Strong Accumulation",
-      color: "green",
-      copy: "Z-Score in historically rare undervaluation territory. Major cycle lows have occurred in this zone."
-    },
-    {
-      test: function (z) { return z >= 0.5 && z < 1.5; },
-      label: "Accumulation",
-      color: "blue",
-      copy: "Z-Score above deep undervaluation but still below historical norms. A historically favorable zone before broader price discovery."
-    },
-    {
-      test: function (z) { return z >= 1.5 && z < 3.0; },
-      label: "Fair Value",
-      color: "neutral",
-      copy: "Z-Score within normal historical range. Market is not at a statistically extreme level."
-    },
-    {
-      test: function (z) { return z >= 3.0 && z < 6.0; },
-      label: "Caution",
-      color: "amber",
-      copy: "Z-Score is stretching above historical norms. Elevated unrealized profit across the market."
-    },
-    {
-      test: function (z) { return z >= 6.0; },
-      label: "Distribution",
-      color: "red",
-      copy: "Z-Score at historically extreme levels. Each prior cycle peak occurred in or near this zone."
-    }
+    { key: "strongAccumulation", test: function (z) { return z < 0.5; },                  color: "green"   },
+    { key: "accumulation",       test: function (z) { return z >= 0.5 && z < 1.5; },       color: "blue"    },
+    { key: "fairValue",          test: function (z) { return z >= 1.5 && z < 3.0; },       color: "neutral" },
+    { key: "caution",            test: function (z) { return z >= 3.0 && z < 6.0; },       color: "amber"   },
+    { key: "distribution",       test: function (z) { return z >= 6.0; },                  color: "red"     }
   ];
 
   function getMvrvZone(z) {
@@ -323,36 +301,11 @@
      Zone logic — LTH Net Position Change 30d (BTC)
      ============================================================ */
   var LTH_ZONES = [
-    {
-      test: function (v) { return v > 300000; },
-      label: "Strong Accumulation",
-      color: "green",
-      copy: "LTH Supply growing rapidly. Smart money is accumulating heavily."
-    },
-    {
-      test: function (v) { return v > 50000; },
-      label: "Accumulation",
-      color: "blue",
-      copy: "Long-term holders are accumulating. A historically favorable signal."
-    },
-    {
-      test: function (v) { return v >= -50000; },
-      label: "Neutral",
-      color: "neutral",
-      copy: "No strong directional signal from long-term holders."
-    },
-    {
-      test: function (v) { return v >= -300000; },
-      label: "Distribution",
-      color: "amber",
-      copy: "Long-term holders are reducing exposure. Watch for further distribution."
-    },
-    {
-      test: function (v) { return v < -300000; },
-      label: "Strong Distribution",
-      color: "red",
-      copy: "Heavy distribution from long-term holders. Historically a caution zone."
-    }
+    { key: "strongAccumulation", test: function (v) { return v > 300000; },     color: "green"   },
+    { key: "accumulation",       test: function (v) { return v > 50000; },      color: "blue"    },
+    { key: "neutral",            test: function (v) { return v >= -50000; },    color: "neutral" },
+    { key: "distribution",       test: function (v) { return v >= -300000; },   color: "amber"   },
+    { key: "strongDistribution", test: function (v) { return v < -300000; },    color: "red"     }
   ];
 
   function getLthZone(value) {
@@ -366,31 +319,11 @@
      Zone logic — Supply in Cold Storage (30d % change)
      ============================================================ */
   var COLD_STORAGE_ZONES = [
-    {
-      test: function(pct) { return pct > 1.0; },
-      label: "Strong Accumulation", color: "green",
-      copy: "Cold storage growing rapidly. Large amounts of BTC leaving active circulation."
-    },
-    {
-      test: function(pct) { return pct > 0.2; },
-      label: "Accumulation", color: "blue",
-      copy: "Cold storage rising steadily. Bitcoin moving away from active markets."
-    },
-    {
-      test: function(pct) { return pct >= -0.2; },
-      label: "Neutral", color: "neutral",
-      copy: "Cold storage stable. No strong directional signal."
-    },
-    {
-      test: function(pct) { return pct >= -1.0; },
-      label: "Distribution", color: "amber",
-      copy: "Cold storage falling. Previously illiquid coins returning to active markets."
-    },
-    {
-      test: function(pct) { return pct < -1.0; },
-      label: "Strong Distribution", color: "red",
-      copy: "Cold storage falling rapidly. Significant coins returning to circulation."
-    }
+    { key: "strongAccumulation", test: function(pct) { return pct > 1.0; },     color: "green"   },
+    { key: "accumulation",       test: function(pct) { return pct > 0.2; },     color: "blue"    },
+    { key: "neutral",            test: function(pct) { return pct >= -0.2; },   color: "neutral" },
+    { key: "distribution",       test: function(pct) { return pct >= -1.0; },   color: "amber"   },
+    { key: "strongDistribution", test: function(pct) { return pct < -1.0; },    color: "red"     }
   ];
 
   function getColdStorageZone(pct) {
@@ -404,31 +337,11 @@
      Zone logic — Puell Multiple
      ============================================================ */
   var PUELL_ZONES = [
-    {
-      test: function(v) { return v < 0.5; },
-      label: "Capitulation", color: "green",
-      copy: "Miners earning well below average. Historically marks cycle lows."
-    },
-    {
-      test: function(v) { return v < 1.0; },
-      label: "Pressure", color: "blue",
-      copy: "Miners below average revenue. A historically favorable zone for accumulation."
-    },
-    {
-      test: function(v) { return v < 1.5; },
-      label: "Neutral", color: "neutral",
-      copy: "Miner revenue near historical average. No extreme signal."
-    },
-    {
-      test: function(v) { return v < 3.0; },
-      label: "Healthy", color: "amber",
-      copy: "Miners earning above average. Market heating up."
-    },
-    {
-      test: function(v) { return v >= 3.0; },
-      label: "Euphoria", color: "red",
-      copy: "Miners earning far above average. Historically coincides with cycle tops."
-    }
+    { key: "capitulation", test: function(v) { return v < 0.5; },  color: "green"   },
+    { key: "pressure",     test: function(v) { return v < 1.0; },  color: "blue"    },
+    { key: "neutral",      test: function(v) { return v < 1.5; },  color: "neutral" },
+    { key: "healthy",      test: function(v) { return v < 3.0; },  color: "amber"   },
+    { key: "euphoria",     test: function(v) { return v >= 3.0; }, color: "red"     }
   ];
 
   function getPuellZone(value) {
@@ -442,31 +355,11 @@
      Zone logic — Whale Balance (>10k BTC, 30d change)
      ============================================================ */
   var WHALE_ZONES = [
-    {
-      test: function(change) { return change > 5; },
-      label: "Strong Accumulation", color: "green",
-      copy: "Whale count rising significantly over 30 days. Large holders actively accumulating."
-    },
-    {
-      test: function(change) { return change > 0; },
-      label: "Accumulation", color: "blue",
-      copy: "Whale count rising over 30 days. Large holders adding to positions."
-    },
-    {
-      test: function(change) { return change === 0; },
-      label: "Neutral", color: "neutral",
-      copy: "Whale count unchanged over 30 days. No directional signal from large holders."
-    },
-    {
-      test: function(change) { return change >= -5; },
-      label: "Distribution", color: "amber",
-      copy: "Whale count falling over 30 days. Large holders reducing positions."
-    },
-    {
-      test: function(change) { return change < -5; },
-      label: "Strong Distribution", color: "red",
-      copy: "Whale count falling significantly over 30 days. Large holders exiting."
-    }
+    { key: "strongAccumulation", test: function(change) { return change > 5; },    color: "green"   },
+    { key: "accumulation",       test: function(change) { return change > 0; },    color: "blue"    },
+    { key: "neutral",            test: function(change) { return change === 0; },  color: "neutral" },
+    { key: "distribution",       test: function(change) { return change >= -5; },  color: "amber"   },
+    { key: "strongDistribution", test: function(change) { return change < -5; },   color: "red"     }
   ];
 
   function getWhaleZone(change) {
@@ -480,31 +373,11 @@
      Zone logic — SOPR (Spent Output Profit Ratio)
      ============================================================ */
   var SOPR_ZONES = [
-    {
-      test: function(v) { return v < 0.85; },
-      label: "Strong Accumulation", color: "green",
-      copy: "SOPR deep below 1 — coins are being spent at a significant loss. Historically marks capitulation and major cycle lows."
-    },
-    {
-      test: function(v) { return v < 1.0; },
-      label: "Accumulation", color: "blue",
-      copy: "SOPR below 1 — the average spent coin is sold at a loss. A historically favorable zone for accumulation."
-    },
-    {
-      test: function(v) { return v < 1.1; },
-      label: "Neutral", color: "neutral",
-      copy: "SOPR near 1 — coins are being moved near their cost basis. No strong directional signal."
-    },
-    {
-      test: function(v) { return v < 1.3; },
-      label: "Distribution", color: "amber",
-      copy: "SOPR above 1 — the average spent coin is in profit. Market participants are taking gains."
-    },
-    {
-      test: function(v) { return v >= 1.3; },
-      label: "Strong Distribution", color: "red",
-      copy: "SOPR significantly above 1 — heavy profit-taking. Historically coincides with late-cycle distribution and tops."
-    }
+    { key: "strongAccumulation", test: function(v) { return v < 0.85; }, color: "green"   },
+    { key: "accumulation",       test: function(v) { return v < 1.0; },  color: "blue"    },
+    { key: "neutral",            test: function(v) { return v < 1.1; },  color: "neutral" },
+    { key: "distribution",       test: function(v) { return v < 1.3; },  color: "amber"   },
+    { key: "strongDistribution", test: function(v) { return v >= 1.3; }, color: "red"     }
   ];
 
   function getSoprZone(value) {
@@ -518,31 +391,11 @@
      Zone logic — NUPL (Net Unrealized Profit/Loss)
      ============================================================ */
   var NUPL_ZONES = [
-    {
-      test: function(v) { return v < 0; },
-      label: "Capitulation", color: "green",
-      copy: "NUPL negative — the market is in aggregate unrealized loss. Historically a rare and significant accumulation opportunity."
-    },
-    {
-      test: function(v) { return v < 0.25; },
-      label: "Accumulation", color: "blue",
-      copy: "NUPL in low positive territory — modest unrealized profit across the market. A historically favorable zone before broader price discovery."
-    },
-    {
-      test: function(v) { return v < 0.5; },
-      label: "Neutral", color: "neutral",
-      copy: "NUPL at moderate levels — the market carries reasonable unrealized profit. No extreme signal in either direction."
-    },
-    {
-      test: function(v) { return v < 0.75; },
-      label: "Distribution", color: "amber",
-      copy: "NUPL elevated — significant unrealized profit across the market. Historically a zone where distribution begins."
-    },
-    {
-      test: function(v) { return v >= 0.75; },
-      label: "Strong Distribution", color: "red",
-      copy: "NUPL near maximum — nearly all holders are in significant profit. Each prior cycle peak reached or approached this zone."
-    }
+    { key: "capitulation",        test: function(v) { return v < 0; },     color: "green"   },
+    { key: "accumulation",        test: function(v) { return v < 0.25; },  color: "blue"    },
+    { key: "neutral",             test: function(v) { return v < 0.5; },   color: "neutral" },
+    { key: "distribution",        test: function(v) { return v < 0.75; },  color: "amber"   },
+    { key: "strongDistribution",  test: function(v) { return v >= 0.75; }, color: "red"     }
   ];
 
   function getNuplZone(value) {
@@ -558,39 +411,50 @@
   var _cycleZones = {};
   var _cycleValues = {};
 
+  // Stable zone key -> icon dot color. Mirrors the historical mapping
+  // (e.g. "distribution" reads amber here even though the RP/MVRV
+  // "Distribution" badge itself renders red via zone.color).
   var ZONE_TO_ICON_COLOR = {
-    "Strong Accumulation": "green",
-    "Capitulation":        "green",
-    "Accumulation":        "blue",
-    "Pressure":            "blue",
-    "Strong Outflow":      "blue",
-    "Outflow":             "blue",
-    "Fair Value":          "neutral",
-    "Neutral":             "neutral",
-    "Caution":             "amber",
-    "Healthy":             "amber",
-    "Inflow":              "amber",
-    "Distribution":        "amber",
-    "Strong Distribution": "red",
-    "Euphoria":            "red",
-    "Strong Inflow":       "red"
+    strongAccumulation: "green",
+    capitulation:       "green",
+    accumulation:       "blue",
+    pressure:           "blue",
+    fairValue:          "neutral",
+    neutral:            "neutral",
+    caution:            "amber",
+    healthy:            "amber",
+    distribution:       "amber",
+    strongDistribution: "red",
+    euphoria:           "red"
   };
 
-  function updateScoreIcons(metricZoneMap) {
-    Object.keys(metricZoneMap).forEach(function(metric) {
+  var METRIC_TITLE_KEYS = {
+    realized:       "rp",
+    mvrv:           "mvrv",
+    lth:            "lth",
+    "cold-storage": "coldStorage",
+    puell:          "puell",
+    whale:          "whale",
+    sopr:           "sopr",
+    nupl:           "nupl"
+  };
+
+  function updateScoreIcons(metricZoneKeyMap) {
+    Object.keys(metricZoneKeyMap).forEach(function(metric) {
       var iconEl = document.querySelector('.score-icon[data-metric="' + metric + '"] .score-icon-dot');
       if (!iconEl) return;
-      var color = ZONE_TO_ICON_COLOR[metricZoneMap[metric]] || 'neutral';
+      var color = ZONE_TO_ICON_COLOR[metricZoneKeyMap[metric]] || 'neutral';
       iconEl.className = 'score-icon-dot score-icon-dot--' + color;
     });
   }
 
-  function attachIconTooltips(metricZoneMap, metricNames) {
-    Object.keys(metricZoneMap).forEach(function(metric) {
+  function attachIconTooltips(metricZoneKeyMap) {
+    Object.keys(metricZoneKeyMap).forEach(function(metric) {
       var iconEl = document.querySelector('.score-icon[data-metric="' + metric + '"]');
       if (!iconEl) return;
-      var label = metricNames[metric] + ': ' + metricZoneMap[metric];
-      attachTooltip(iconEl, label);
+      var metricName = I18N.t("metrics." + METRIC_TITLE_KEYS[metric] + ".title");
+      var zoneText = I18N.t("zones." + metricZoneKeyMap[metric]);
+      Tooltips.attach(iconEl, metricName + ': ' + zoneText);
     });
   }
 
@@ -602,7 +466,7 @@
         [z.realized, z.mvrv, z.lth, z.coldStorage, z.puell, z.whale, z.sopr, z.nupl],
         _cycleValues
       );
-      var iconZoneMap = {
+      var iconZoneKeyMap = {
         realized:       z.realized,
         mvrv:           z.mvrv,
         lth:            z.lth,
@@ -612,17 +476,8 @@
         sopr:           z.sopr,
         nupl:           z.nupl
       };
-      updateScoreIcons(iconZoneMap);
-      attachIconTooltips(iconZoneMap, {
-        realized:       'Realized Price',
-        mvrv:           'MVRV Z-Score',
-        lth:            'LTH Net Position Change',
-        'cold-storage': 'Supply in Cold Storage',
-        puell:          'Puell Multiple',
-        whale:          'Whale Balance',
-        sopr:           'SOPR',
-        nupl:           'NUPL'
-      });
+      updateScoreIcons(iconZoneKeyMap);
+      attachIconTooltips(iconZoneKeyMap);
     }
   }
 
@@ -630,10 +485,10 @@
      Premium/Discount label builder
      ============================================================ */
   function premiumLabel(premiumPct) {
-    if (premiumPct >= 0) {
-      return Math.abs(premiumPct).toFixed(1) + "% above cost basis";
-    }
-    return Math.abs(premiumPct).toFixed(1) + "% below cost basis";
+    var suffix = premiumPct >= 0
+      ? I18N.t("units.aboveCostBasis")
+      : I18N.t("units.belowCostBasis");
+    return Math.abs(premiumPct).toFixed(1) + suffix;
   }
 
   /* ============================================================
@@ -652,7 +507,7 @@
   function showError(msg) {
     var errEl = document.getElementById("data-error");
     if (errEl) {
-      errEl.textContent = msg || "Data unavailable — will retry on next update.";
+      errEl.textContent = msg || I18N.t("errors.dataUnavailableRetry");
       errEl.hidden = false;
     }
     // Hide metric blocks so we don't show partial/broken state
@@ -666,19 +521,20 @@
      ============================================================ */
   function renderFreshness(rpDate, mvrvDate) {
     var date = rpDate || mvrvDate;
+    var locale = I18N.getLang() === "pt" ? "pt-BR" : "en-US";
 
     var dateStr = "";
     if (date) {
       // Append T00:00:00Z to force UTC parsing — avoids timezone off-by-one
       var d = new Date(date + "T00:00:00Z");
       if (!isNaN(d.getTime())) {
-        dateStr = d.toLocaleDateString("en-US", {
+        dateStr = d.toLocaleDateString(locale, {
           year: "numeric", month: "long", day: "numeric", timeZone: "UTC"
         });
       }
     }
     if (!dateStr) {
-      dateStr = new Date().toLocaleDateString("en-US", {
+      dateStr = new Date().toLocaleDateString(locale, {
         year: "numeric", month: "long", day: "numeric"
       });
     }
@@ -704,20 +560,14 @@
 
     var badgeEl = document.getElementById("rp-zone-badge");
     if (badgeEl) {
-      badgeEl.textContent = zone.label;
+      badgeEl.textContent = zoneLabel(zone);
       badgeEl.className = "zone-badge zone-badge--" + zone.color;
     }
 
-    // Interpretation: use TOOLTIPS if available, fall back to zone.copy
-    var rpInterp = (typeof TOOLTIPS !== "undefined" &&
-                    TOOLTIPS.realizedPriceInterpretation &&
-                    TOOLTIPS.realizedPriceInterpretation[zone.label])
-      ? TOOLTIPS.realizedPriceInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe("rp-interpretation", rpInterp);
+    setTextSafe("rp-interpretation", metricInterpretation("rp", zone));
 
-    _cycleZones.realized = zone.label;
-    _cycleValues.realizedZone = zone.label;
+    _cycleZones.realized = zone.key;
+    _cycleValues.realizedZone = zone.key;
     _cycleValues.realizedPremium = premiumPct.toFixed(1);
     tryUpdateCycleScore();
   }
@@ -732,20 +582,14 @@
 
     var badgeEl = document.getElementById("mvrv-zone-badge");
     if (badgeEl) {
-      badgeEl.textContent = zone.label;
+      badgeEl.textContent = zoneLabel(zone);
       badgeEl.className = "zone-badge zone-badge--" + zone.color;
     }
 
-    // Interpretation: use TOOLTIPS if available, fall back to zone.copy
-    var mvrvInterp = (typeof TOOLTIPS !== "undefined" &&
-                      TOOLTIPS.mvrvInterpretation &&
-                      TOOLTIPS.mvrvInterpretation[zone.label])
-      ? TOOLTIPS.mvrvInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe("mvrv-interpretation", mvrvInterp);
+    setTextSafe("mvrv-interpretation", metricInterpretation("mvrv", zone));
 
-    _cycleZones.mvrv = zone.label;
-    _cycleValues.mvrvZone = zone.label;
+    _cycleZones.mvrv = zone.key;
+    _cycleValues.mvrvZone = zone.key;
     _cycleValues.mvrvValue = zScore.toFixed(2);
     tryUpdateCycleScore();
   }
@@ -763,19 +607,14 @@
 
     var badge = document.getElementById("lth-zone-badge");
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = "zone-badge zone-badge--" + zone.color;
     }
 
-    var interp = (typeof TOOLTIPS !== "undefined" &&
-                  TOOLTIPS.lthInterpretation &&
-                  TOOLTIPS.lthInterpretation[zone.label])
-      ? TOOLTIPS.lthInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe("lth-interpretation", interp);
+    setTextSafe("lth-interpretation", metricInterpretation("lth", zone));
 
-    _cycleZones.lth = zone.label;
-    _cycleValues.lthZone = zone.label;
+    _cycleZones.lth = zone.key;
+    _cycleValues.lthZone = zone.key;
     _cycleValues.lthValue = formatted;
     tryUpdateCycleScore();
   }
@@ -787,23 +626,18 @@
     var zone = getColdStorageZone(data.changePct);
     var sign = data.changePct >= 0 ? '↑ +' : '↓ ';
     setTextSafe('cold-storage-value', Math.round(data.current).toLocaleString('en-US') + ' BTC');
-    setTextSafe('cold-storage-change', sign + data.changePct.toFixed(2) + '% (30d)');
+    setTextSafe('cold-storage-change', sign + data.changePct.toFixed(2) + '% ' + I18N.t("units.day30"));
     var changeEl = document.getElementById('cold-storage-change');
     if (changeEl) changeEl.className = 'metric-secondary ' + (data.changePct >= 0 ? 'direction-up' : 'direction-down');
     var badge = document.getElementById('cold-storage-zone-badge');
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-    var interp = (typeof TOOLTIPS !== 'undefined' &&
-                  TOOLTIPS.coldStorageInterpretation &&
-                  TOOLTIPS.coldStorageInterpretation[zone.label])
-      ? TOOLTIPS.coldStorageInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe('cold-storage-interpretation', interp);
+    setTextSafe('cold-storage-interpretation', metricInterpretation("coldStorage", zone));
 
-    _cycleZones.coldStorage = zone.label;
-    _cycleValues.coldStorageZone = zone.label;
+    _cycleZones.coldStorage = zone.key;
+    _cycleValues.coldStorageZone = zone.key;
     _cycleValues.coldStorageChange = data.changePct.toFixed(2);
     tryUpdateCycleScore();
   }
@@ -816,18 +650,13 @@
     setTextSafe('puell-value', value.toFixed(2));
     var badge = document.getElementById('puell-zone-badge');
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-    var interp = (typeof TOOLTIPS !== 'undefined' &&
-                  TOOLTIPS.puellInterpretation &&
-                  TOOLTIPS.puellInterpretation[zone.label])
-      ? TOOLTIPS.puellInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe('puell-interpretation', interp);
+    setTextSafe('puell-interpretation', metricInterpretation("puell", zone));
 
-    _cycleZones.puell = zone.label;
-    _cycleValues.puellZone = zone.label;
+    _cycleZones.puell = zone.key;
+    _cycleValues.puellZone = zone.key;
     _cycleValues.puellValue = value.toFixed(2);
     tryUpdateCycleScore();
   }
@@ -838,24 +667,19 @@
   function renderWhaleBalance(data) {
     var zone = getWhaleZone(data.change);
     var sign = data.change > 0 ? '↑ +' : (data.change < 0 ? '↓ ' : '');
-    setTextSafe('whale-value', data.current.toLocaleString('en-US') + ' addresses');
-    setTextSafe('whale-change', sign + data.change + ' (30d)');
+    setTextSafe('whale-value', data.current.toLocaleString('en-US') + ' ' + I18N.t("units.addresses"));
+    setTextSafe('whale-change', sign + data.change + ' ' + I18N.t("units.day30"));
     var whaleChangeEl = document.getElementById('whale-change');
     if (whaleChangeEl) whaleChangeEl.className = 'metric-secondary ' + (data.change > 0 ? 'direction-up' : data.change < 0 ? 'direction-down' : 'direction-flat');
     var badge = document.getElementById('whale-zone-badge');
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-    var interp = (typeof TOOLTIPS !== 'undefined' &&
-                  TOOLTIPS.whaleInterpretation &&
-                  TOOLTIPS.whaleInterpretation[zone.label])
-      ? TOOLTIPS.whaleInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe('whale-interpretation', interp);
+    setTextSafe('whale-interpretation', metricInterpretation("whale", zone));
 
-    _cycleZones.whale = zone.label;
-    _cycleValues.whaleZone = zone.label;
+    _cycleZones.whale = zone.key;
+    _cycleValues.whaleZone = zone.key;
     _cycleValues.whaleChange = data.change;
     tryUpdateCycleScore();
   }
@@ -868,18 +692,13 @@
     setTextSafe('sopr-value', value.toFixed(3));
     var badge = document.getElementById('sopr-zone-badge');
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-    var interp = (typeof TOOLTIPS !== 'undefined' &&
-                  TOOLTIPS.soprInterpretation &&
-                  TOOLTIPS.soprInterpretation[zone.label])
-      ? TOOLTIPS.soprInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe('sopr-interpretation', interp);
+    setTextSafe('sopr-interpretation', metricInterpretation("sopr", zone));
 
-    _cycleZones.sopr = zone.label;
-    _cycleValues.soprZone = zone.label;
+    _cycleZones.sopr = zone.key;
+    _cycleValues.soprZone = zone.key;
     _cycleValues.soprValue = value.toFixed(3);
     tryUpdateCycleScore();
   }
@@ -892,202 +711,139 @@
     setTextSafe('nupl-value', value.toFixed(3));
     var badge = document.getElementById('nupl-zone-badge');
     if (badge) {
-      badge.textContent = zone.label;
+      badge.textContent = zoneLabel(zone);
       badge.className = 'zone-badge zone-badge--' + zone.color;
     }
-    var interp = (typeof TOOLTIPS !== 'undefined' &&
-                  TOOLTIPS.nuplInterpretation &&
-                  TOOLTIPS.nuplInterpretation[zone.label])
-      ? TOOLTIPS.nuplInterpretation[zone.label]
-      : zone.copy;
-    setTextSafe('nupl-interpretation', interp);
+    setTextSafe('nupl-interpretation', metricInterpretation("nupl", zone));
 
-    _cycleZones.nupl = zone.label;
-    _cycleValues.nuplZone = zone.label;
+    _cycleZones.nupl = zone.key;
+    _cycleValues.nuplZone = zone.key;
     _cycleValues.nuplValue = value.toFixed(3);
     tryUpdateCycleScore();
   }
 
   /* ============================================================
-     Tooltip system — single instance, mobile-safe
+     Tooltip content — builds zone-badge glossary arrays from I18N
+     (name comes from the shared `zones` table, description from the
+     metric-specific `tooltips.<metric>.zoneBadge` table).
      ============================================================ */
-  var tooltipEl = document.createElement("div");
-  tooltipEl.className = "tooltip-box";
-  tooltipEl.setAttribute("role", "tooltip");
-  document.body.appendChild(tooltipEl);
+  var ZONE_ORDER_5 = ["strongAccumulation", "accumulation", "fairValue", "caution", "distribution"];
+  var ZONE_ORDER_NEUTRAL = ["strongAccumulation", "accumulation", "neutral", "distribution", "strongDistribution"];
+  var ZONE_ORDER_PUELL = ["capitulation", "pressure", "neutral", "healthy", "euphoria"];
+  var ZONE_ORDER_NUPL = ["capitulation", "accumulation", "neutral", "distribution", "strongDistribution"];
+  var ZONE_COLORS_5 = ["green", "blue", "neutral", "amber", "red"];
 
-  var currentTrigger = null;
-
-  function renderTooltipContent(content) {
-    tooltipEl.innerHTML = "";
-    if (typeof content === "string") {
-      var p = document.createElement("p");
-      p.textContent = content;
-      tooltipEl.appendChild(p);
-    } else if (Array.isArray(content)) {
-      content.forEach(function (zone) {
-        var row = document.createElement("div");
-        row.className = "tooltip-zone-row";
-        row.innerHTML = '<span class="tooltip-zone-dot zone-dot-' + zone.color + '"></span>'
-          + "<div><strong>" + zone.name + "</strong><p>" + zone.description + "</p></div>";
-        tooltipEl.appendChild(row);
-      });
-    }
-  }
-
-  function positionTooltip(triggerEl) {
-    var rect = triggerEl.getBoundingClientRect();
-    var tipWidth = 300;
-    var left = rect.left + window.scrollX;
-    var top  = rect.bottom + window.scrollY + 8;
-
-    if (left + tipWidth > window.innerWidth - 16) {
-      left = window.innerWidth - tipWidth - 16;
-    }
-    if (left < 8) left = 8;
-
-    tooltipEl.style.top  = top  + "px";
-    tooltipEl.style.left = left + "px";
-  }
-
-  function showTooltip(triggerEl, content) {
-    if (currentTrigger === triggerEl) return;
-    currentTrigger = triggerEl;
-    renderTooltipContent(content);
-    positionTooltip(triggerEl);
-    tooltipEl.classList.add("visible");
-  }
-
-  function hideTooltip() {
-    currentTrigger = null;
-    tooltipEl.classList.remove("visible");
-  }
-
-  function attachTooltip(triggerEl, content) {
-    triggerEl.classList.add("tooltip-trigger");
-    triggerEl.setAttribute("tabindex", "0");
-
-    triggerEl.addEventListener("mouseenter", function () { showTooltip(triggerEl, content); });
-    triggerEl.addEventListener("mouseleave", hideTooltip);
-    triggerEl.addEventListener("focus",      function () { showTooltip(triggerEl, content); });
-    triggerEl.addEventListener("blur",       hideTooltip);
-
-    // Mobile tap toggle
-    triggerEl.addEventListener("click", function (e) {
-      e.stopPropagation();
-      if (currentTrigger === triggerEl) { hideTooltip(); }
-      else                              { showTooltip(triggerEl, content); }
+  function buildZoneGlossary(metricKey, order) {
+    return order.map(function (key, i) {
+      return {
+        name: I18N.t("zones." + key),
+        color: ZONE_COLORS_5[i],
+        description: I18N.t("tooltips." + metricKey + ".zoneBadge." + key)
+      };
     });
   }
 
-  // Close on outside click, scroll, or resize
-  document.addEventListener("click",  hideTooltip);
-  document.addEventListener("scroll", hideTooltip, { passive: true });
-  window.addEventListener("resize",   hideTooltip);
-
   function attachAllTooltips(zScore) {
-    if (typeof TOOLTIPS === "undefined") return;
-
     // Title links — navigation + tooltip on hover
     var rpTitle = document.querySelector("#rp-label .metric-title-link");
-    if (rpTitle) attachTooltip(rpTitle, TOOLTIPS.realizedPriceTitle.text);
+    if (rpTitle) Tooltips.attach(rpTitle, I18N.t("tooltips.rp.title"));
 
     var mvrvTitle = document.querySelector("#mvrv-label .metric-title-link");
-    if (mvrvTitle) attachTooltip(mvrvTitle, TOOLTIPS.mvrvZScoreTitle.text);
+    if (mvrvTitle) Tooltips.attach(mvrvTitle, I18N.t("tooltips.mvrv.title"));
 
     // Realized Price data points
     var rpValueEl  = document.getElementById("rp-value");
-    if (rpValueEl)  attachTooltip(rpValueEl,  TOOLTIPS.realizedPriceValue.text);
+    if (rpValueEl)  Tooltips.attach(rpValueEl,  I18N.t("tooltips.rp.value"));
 
     var btcPriceEl = document.getElementById("btc-price-display");
-    if (btcPriceEl) attachTooltip(btcPriceEl, TOOLTIPS.btcSpotPrice.text);
+    if (btcPriceEl) Tooltips.attach(btcPriceEl, I18N.t("tooltips.rp.btcSpotPrice"));
 
     var rpPremEl   = document.getElementById("rp-premium");
-    if (rpPremEl)   attachTooltip(rpPremEl,   TOOLTIPS.premiumDiscount.text);
+    if (rpPremEl)   Tooltips.attach(rpPremEl,   I18N.t("tooltips.rp.premiumDiscount"));
 
     // MVRV Z-Score value — dynamic text based on live value
     var mvrvValueEl = document.getElementById("mvrv-value");
     if (mvrvValueEl) {
-      var mvrvZoneLabel = getMvrvZone(zScore).label;
-      var mvrvValueText = "A Z-Score of " + zScore.toFixed(2)
-        + " places the market in the " + mvrvZoneLabel
-        + " zone. Values above 5 have historically coincided with cycle tops;"
-        + " below 0.1 with generational lows.";
-      attachTooltip(mvrvValueEl, mvrvValueText);
+      var mvrvZone = getMvrvZone(zScore);
+      var mvrvValueText = I18N.t("tooltips.mvrv.dynamicValue", {
+        value: zScore.toFixed(2),
+        zone: zoneLabel(mvrvZone)
+      });
+      Tooltips.attach(mvrvValueEl, mvrvValueText);
     }
 
     // Zone badges — per-metric glossaries
     var rpBadgeEl   = document.getElementById("rp-zone-badge");
-    if (rpBadgeEl)   attachTooltip(rpBadgeEl,   TOOLTIPS.realizedPriceZoneBadge.zones);
+    if (rpBadgeEl)   Tooltips.attach(rpBadgeEl,   buildZoneGlossary("rp", ZONE_ORDER_5));
 
     var mvrvBadgeEl = document.getElementById("mvrv-zone-badge");
-    if (mvrvBadgeEl) attachTooltip(mvrvBadgeEl, TOOLTIPS.mvrvZoneBadge.zones);
+    if (mvrvBadgeEl) Tooltips.attach(mvrvBadgeEl, buildZoneGlossary("mvrv", ZONE_ORDER_5));
 
     // LTH Net Position Change tooltips
     var lthTitle = document.querySelector("#lth-label .metric-title-link");
-    if (lthTitle) attachTooltip(lthTitle, TOOLTIPS.lthTitle.text);
+    if (lthTitle) Tooltips.attach(lthTitle, I18N.t("tooltips.lth.title"));
 
     var lthValueEl = document.getElementById("lth-value");
-    if (lthValueEl) attachTooltip(lthValueEl, TOOLTIPS.lthValue.text);
+    if (lthValueEl) Tooltips.attach(lthValueEl, I18N.t("tooltips.lth.value"));
 
     var lthBadgeEl = document.getElementById("lth-zone-badge");
-    if (lthBadgeEl) attachTooltip(lthBadgeEl, TOOLTIPS.lthZoneBadge.zones);
+    if (lthBadgeEl) Tooltips.attach(lthBadgeEl, buildZoneGlossary("lth", ZONE_ORDER_NEUTRAL));
 
     // Cold Storage tooltips
     var coldStorageTitle = document.querySelector("#cold-storage-block .metric-title-link");
-    if (coldStorageTitle) attachTooltip(coldStorageTitle, TOOLTIPS.coldStorageTitle.text);
+    if (coldStorageTitle) Tooltips.attach(coldStorageTitle, I18N.t("tooltips.coldStorage.title"));
 
     var coldStorageValueEl = document.getElementById("cold-storage-value");
-    if (coldStorageValueEl) attachTooltip(coldStorageValueEl, TOOLTIPS.coldStorageValue.text);
+    if (coldStorageValueEl) Tooltips.attach(coldStorageValueEl, I18N.t("tooltips.coldStorage.value"));
 
     var coldStorageChangeEl = document.getElementById("cold-storage-change");
-    if (coldStorageChangeEl) attachTooltip(coldStorageChangeEl, TOOLTIPS.coldStorageChange.text);
+    if (coldStorageChangeEl) Tooltips.attach(coldStorageChangeEl, I18N.t("tooltips.coldStorage.change"));
 
     var coldStorageBadgeEl = document.getElementById("cold-storage-zone-badge");
-    if (coldStorageBadgeEl) attachTooltip(coldStorageBadgeEl, TOOLTIPS.coldStorageZoneBadge.zones);
+    if (coldStorageBadgeEl) Tooltips.attach(coldStorageBadgeEl, buildZoneGlossary("coldStorage", ZONE_ORDER_NEUTRAL));
 
     // Puell Multiple tooltips
     var puellTitle = document.querySelector("#puell-label .metric-title-link");
-    if (puellTitle) attachTooltip(puellTitle, TOOLTIPS.puellTitle.text);
+    if (puellTitle) Tooltips.attach(puellTitle, I18N.t("tooltips.puell.title"));
 
     var puellValueEl = document.getElementById("puell-value");
-    if (puellValueEl) attachTooltip(puellValueEl, TOOLTIPS.puellValue.text);
+    if (puellValueEl) Tooltips.attach(puellValueEl, I18N.t("tooltips.puell.value"));
 
     var puellBadgeEl = document.getElementById("puell-zone-badge");
-    if (puellBadgeEl) attachTooltip(puellBadgeEl, TOOLTIPS.puellZoneBadge.zones);
+    if (puellBadgeEl) Tooltips.attach(puellBadgeEl, buildZoneGlossary("puell", ZONE_ORDER_PUELL));
 
     // Whale Balance tooltips
     var whaleTitle = document.querySelector("#whale-label .metric-title-link");
-    if (whaleTitle) attachTooltip(whaleTitle, TOOLTIPS.whaleTitle.text);
+    if (whaleTitle) Tooltips.attach(whaleTitle, I18N.t("tooltips.whale.title"));
 
     var whaleValueEl = document.getElementById("whale-value");
-    if (whaleValueEl) attachTooltip(whaleValueEl, TOOLTIPS.whaleValue.text);
+    if (whaleValueEl) Tooltips.attach(whaleValueEl, I18N.t("tooltips.whale.value"));
 
     var whaleChangeEl = document.getElementById("whale-change");
-    if (whaleChangeEl) attachTooltip(whaleChangeEl, TOOLTIPS.whaleChange.text);
+    if (whaleChangeEl) Tooltips.attach(whaleChangeEl, I18N.t("tooltips.whale.change"));
 
     var whaleBadgeEl = document.getElementById("whale-zone-badge");
-    if (whaleBadgeEl) attachTooltip(whaleBadgeEl, TOOLTIPS.whaleZoneBadge.zones);
+    if (whaleBadgeEl) Tooltips.attach(whaleBadgeEl, buildZoneGlossary("whale", ZONE_ORDER_NEUTRAL));
 
     // SOPR tooltips
     var soprTitle = document.querySelector("#sopr-label .metric-title-link");
-    if (soprTitle) attachTooltip(soprTitle, TOOLTIPS.soprTitle.text);
+    if (soprTitle) Tooltips.attach(soprTitle, I18N.t("tooltips.sopr.title"));
 
     var soprValueEl = document.getElementById("sopr-value");
-    if (soprValueEl) attachTooltip(soprValueEl, TOOLTIPS.soprValue.text);
+    if (soprValueEl) Tooltips.attach(soprValueEl, I18N.t("tooltips.sopr.value"));
 
     var soprBadgeEl = document.getElementById("sopr-zone-badge");
-    if (soprBadgeEl) attachTooltip(soprBadgeEl, TOOLTIPS.soprZoneBadge.zones);
+    if (soprBadgeEl) Tooltips.attach(soprBadgeEl, buildZoneGlossary("sopr", ZONE_ORDER_NEUTRAL));
 
     // NUPL tooltips
     var nuplTitle = document.querySelector("#nupl-label .metric-title-link");
-    if (nuplTitle) attachTooltip(nuplTitle, TOOLTIPS.nuplTitle.text);
+    if (nuplTitle) Tooltips.attach(nuplTitle, I18N.t("tooltips.nupl.title"));
 
     var nuplValueEl = document.getElementById("nupl-value");
-    if (nuplValueEl) attachTooltip(nuplValueEl, TOOLTIPS.nuplValue.text);
+    if (nuplValueEl) Tooltips.attach(nuplValueEl, I18N.t("tooltips.nupl.value"));
 
     var nuplBadgeEl = document.getElementById("nupl-zone-badge");
-    if (nuplBadgeEl) attachTooltip(nuplBadgeEl, TOOLTIPS.nuplZoneBadge.zones);
+    if (nuplBadgeEl) Tooltips.attach(nuplBadgeEl, buildZoneGlossary("nupl", ZONE_ORDER_NUPL));
   }
 
   /* ============================================================
@@ -1122,9 +878,9 @@
   /* ============================================================
      Main data load
      ============================================================ */
-  var RP_PATH   = "data/realized-price.json";
-  var MVRV_PATH = "data/mvrv-zscore.json";
-  var BTC_PATH  = "data/btc-price.json";
+  var RP_PATH   = DATA_BASE + "realized-price.json";
+  var MVRV_PATH = DATA_BASE + "mvrv-zscore.json";
+  var BTC_PATH  = DATA_BASE + "btc-price.json";
 
   Promise.all([
     fetchJSON(RP_PATH),
@@ -1139,7 +895,7 @@
     var zScore  = extractNumeric(mvrvRaw);
 
     if (rpValue === null || zScore === null) {
-      showError("Data unavailable — will retry on next update.");
+      showError();
       return;
     }
 
@@ -1160,7 +916,7 @@
       var isLive   = livePrice !== null;
 
       if (btcPrice === null) {
-        showError("Data unavailable — will retry on next update.");
+        showError();
         return;
       }
 
@@ -1174,61 +930,61 @@
 
   }).catch(function (err) {
     console.error("[btc-cycle] failed to load metrics:", err);
-    showError("Data unavailable — will retry on next update.");
+    showError();
   });
 
   // LTH and exchange fetches are independent — failures don't affect existing metrics
-  fetch("data/lth-position-change.json")
+  fetch(DATA_BASE + "lth-position-change.json")
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var value = extractLthValue(data);
       if (value !== null) renderLth(value);
     })
-    .catch(function () { setTextSafe("lth-value", "Data unavailable"); });
+    .catch(function () { setTextSafe("lth-value", I18N.t("errors.dataUnavailable")); });
 
-  fetch('data/illiquid-supply.json')
+  fetch(DATA_BASE + 'illiquid-supply.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var result = extractColdStorage(data);
       if (result) renderColdStorage(result);
-      else setTextSafe('cold-storage-value', 'Data unavailable');
+      else setTextSafe('cold-storage-value', I18N.t("errors.dataUnavailable"));
     })
-    .catch(function() { setTextSafe('cold-storage-value', 'Data unavailable'); });
+    .catch(function() { setTextSafe('cold-storage-value', I18N.t("errors.dataUnavailable")); });
 
-  fetch('data/puell-multiple.json')
+  fetch(DATA_BASE + 'puell-multiple.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var value = extractPuell(data);
       if (value !== null) renderPuell(value);
-      else setTextSafe('puell-value', 'Data unavailable');
+      else setTextSafe('puell-value', I18N.t("errors.dataUnavailable"));
     })
-    .catch(function() { setTextSafe('puell-value', 'Data unavailable'); });
+    .catch(function() { setTextSafe('puell-value', I18N.t("errors.dataUnavailable")); });
 
-  fetch('data/whale-balance.json')
+  fetch(DATA_BASE + 'whale-balance.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var result = extractWhaleBalance(data);
       if (result) renderWhaleBalance(result);
-      else setTextSafe('whale-value', 'Data unavailable');
+      else setTextSafe('whale-value', I18N.t("errors.dataUnavailable"));
     })
-    .catch(function() { setTextSafe('whale-value', 'Data unavailable'); });
+    .catch(function() { setTextSafe('whale-value', I18N.t("errors.dataUnavailable")); });
 
-  fetch('data/sopr.json')
+  fetch(DATA_BASE + 'sopr.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var value = extractSopr(data);
       if (value !== null) renderSopr(value);
-      else setTextSafe('sopr-value', 'Data unavailable');
+      else setTextSafe('sopr-value', I18N.t("errors.dataUnavailable"));
     })
-    .catch(function() { setTextSafe('sopr-value', 'Data unavailable'); });
+    .catch(function() { setTextSafe('sopr-value', I18N.t("errors.dataUnavailable")); });
 
-  fetch('data/nupl.json')
+  fetch(DATA_BASE + 'nupl.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var value = extractNupl(data);
       if (value !== null) renderNupl(value);
-      else setTextSafe('nupl-value', 'Data unavailable');
+      else setTextSafe('nupl-value', I18N.t("errors.dataUnavailable"));
     })
-    .catch(function() { setTextSafe('nupl-value', 'Data unavailable'); });
+    .catch(function() { setTextSafe('nupl-value', I18N.t("errors.dataUnavailable")); });
 
 })();

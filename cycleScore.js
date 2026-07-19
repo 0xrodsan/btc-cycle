@@ -1,44 +1,46 @@
 // cycleScore.js
 // Computes an aggregate cycle score from all active metric zones.
+// Zones are identified by their stable, language-agnostic key (see
+// main.js) — display text is looked up from I18N at render time.
 
 var ZONE_SCORES = {
   // Strongly bullish
-  "Strong Accumulation": 5,
-  "Capitulation":       5,
+  strongAccumulation: 5,
+  capitulation:        5,
   // Bullish
-  "Accumulation":       4,
-  "Pressure":           4,
-  "Strong Outflow":     4,
-  "Outflow":            4,
+  accumulation:        4,
+  pressure:             4,
+  strongOutflow:        4,
+  outflow:              4,
   // Neutral
-  "Fair Value":         3,
-  "Neutral":            3,
+  fairValue:            3,
+  neutral:              3,
   // Bearish
-  "Caution":            2,
-  "Healthy":            2,
-  "Inflow":             2,
-  "Distribution":       2,
+  caution:              2,
+  healthy:              2,
+  inflow:               2,
+  distribution:         2,
   // Strongly bearish
-  "Strong Distribution": 1,
-  "Euphoria":           1,
-  "Strong Inflow":      1
+  strongDistribution:   1,
+  euphoria:             1,
+  strongInflow:         1
 };
 
 var SCORE_LABELS = [
-  { min: 4.0, label: "Strong Accumulation", color: "green"   },
-  { min: 3.3, label: "Accumulation",        color: "blue"    },
-  { min: 2.7, label: "Fair Value",          color: "neutral" },
-  { min: 1.7, label: "Caution",             color: "amber"   },
-  { min: 0.0, label: "Distribution",        color: "red"     }
+  { min: 4.0, key: "strongAccumulation", color: "green"   },
+  { min: 3.3, key: "accumulation",       color: "blue"    },
+  { min: 2.7, key: "fairValue",          color: "neutral" },
+  { min: 1.7, key: "caution",            color: "amber"   },
+  { min: 0.0, key: "distribution",       color: "red"     }
 ];
 
-function computeCycleScore(zoneLabels) {
-  // zoneLabels: array of zone label strings from each active metric
+function computeCycleScore(zoneKeys) {
+  // zoneKeys: array of stable zone key strings from each active metric
   var total = 0;
   var count = 0;
-  zoneLabels.forEach(function(label) {
-    if (ZONE_SCORES[label] !== undefined) {
-      total += ZONE_SCORES[label];
+  zoneKeys.forEach(function(key) {
+    if (ZONE_SCORES[key] !== undefined) {
+      total += ZONE_SCORES[key];
       count++;
     }
   });
@@ -48,11 +50,11 @@ function computeCycleScore(zoneLabels) {
     if (avg >= SCORE_LABELS[i].min) {
       return {
         avg: avg,
-        label: SCORE_LABELS[i].label,
+        key: SCORE_LABELS[i].key,
         color: SCORE_LABELS[i].color,
         count: count,
-        favorable: zoneLabels.filter(function(z) {
-          return ZONE_SCORES[z] >= 4;
+        favorable: zoneKeys.filter(function(k) {
+          return ZONE_SCORES[k] >= 4;
         }).length
       };
     }
@@ -69,14 +71,17 @@ function renderCycleScore(score) {
   // Badge
   var badge = document.getElementById('cycle-score-badge');
   if (badge) {
-    badge.textContent = score.label;
+    badge.textContent = I18N.t('zones.' + score.key);
     badge.className = 'zone-badge zone-badge--' + score.color;
   }
 
   // Signal count
   var count = document.getElementById('cycle-score-count');
   if (count) {
-    count.textContent = score.favorable + ' of ' + score.count + ' signals favorable';
+    count.textContent = I18N.t('cycleScore.signalsFavorable', {
+      favorable: score.favorable,
+      count: score.count
+    });
   }
 
   // Progress bar — 5 segments
@@ -91,14 +96,14 @@ function renderCycleScore(score) {
   }
 }
 
-// Store current zone labels for AI analysis access
+// Store current zone keys for AI analysis access
 var _currentZoneLabels = [];
 var _currentMetricValues = {};
 
-function updateCycleScore(zoneLabels, metricValues) {
-  _currentZoneLabels = zoneLabels;
+function updateCycleScore(zoneKeys, metricValues) {
+  _currentZoneLabels = zoneKeys;
   _currentMetricValues = metricValues;
-  var score = computeCycleScore(zoneLabels);
+  var score = computeCycleScore(zoneKeys);
   renderCycleScore(score);
   return score;
 }

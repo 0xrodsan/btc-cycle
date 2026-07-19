@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bitcoin Cycle | Blackbox</title>
-  <meta name="description" content="Sinais on-chain para holders de longo prazo — versão em português em breve.">
+  <meta name="description" content="Sinais on-chain para holders de longo prazo de Bitcoin — preço realizado, MVRV Z-Score e análise de zona de ciclo.">
 
   <link rel="alternate" hreflang="pt-BR" href="https://0xrodsan.github.io/btc-cycle/pt/">
   <link rel="alternate" hreflang="en" href="https://0xrodsan.github.io/btc-cycle/">
@@ -90,23 +90,288 @@
        ============================================================ -->
   <main class="main-content">
 
+    <div class="view-toggle" role="group" aria-label="Modo de exibição">
+      <button class="view-toggle-btn view-toggle-btn--active" id="btn-detailed" type="button">Detalhado</button>
+      <button class="view-toggle-btn" id="btn-simple" type="button">Simples</button>
+    </div>
+
     <!-- Hero -->
     <section class="hero reveal" aria-labelledby="hero-title">
       <h1 id="hero-title" class="hero-title">Bitcoin Cycle</h1>
-      <p class="hero-subtitle">Em breve em português.</p>
+      <p class="hero-subtitle">Sinais on-chain para holders de longo prazo.</p>
     </section>
 
-    <!-- Placeholder -->
-    <section class="metrics-section" aria-label="Aviso de idioma">
-      <div class="metric-block reveal" style="text-align: center; padding: 3rem 0;">
-        <p style="color: var(--color-text-muted); line-height: 1.8; margin-bottom: 1.5rem;">
-          Esta ferramenta está disponível apenas em inglês no momento.<br>
-          A versão em português está a caminho.
-        </p>
-        <a href="https://0xrodsan.github.io/btc-cycle/" style="font-size: 0.9rem; font-weight: 500; color: var(--color-text);">
-          → Ver versão em inglês
-        </a>
+    <!-- Cycle Score -->
+    <section class="cycle-score-section" id="cycle-score-container" aria-label="Leitura agregada do ciclo">
+      <div class="cycle-score-header">
+        <span class="cycle-score-label">Leitura do Ciclo</span>
+        <span class="zone-badge zone-badge--neutral" id="cycle-score-badge">—</span>
       </div>
+
+      <div class="cycle-score-icons" id="cycle-score-icons" aria-label="Sinais individuais de cada métrica">
+        <div class="score-icon" data-metric="realized" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">RP</span>
+        </div>
+        <div class="score-icon" data-metric="mvrv" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">MVRV</span>
+        </div>
+        <div class="score-icon" data-metric="lth" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">LTH</span>
+        </div>
+        <div class="score-icon" data-metric="cold-storage" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">Cold</span>
+        </div>
+        <div class="score-icon" data-metric="puell" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">Puell</span>
+        </div>
+        <div class="score-icon" data-metric="whale" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">Baleia</span>
+        </div>
+        <div class="score-icon" data-metric="sopr" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">SOPR</span>
+        </div>
+        <div class="score-icon" data-metric="nupl" tabindex="0">
+          <span class="score-icon-dot score-icon-dot--empty"></span>
+          <span class="score-icon-label">NUPL</span>
+        </div>
+      </div>
+
+      <div class="cycle-score-bar" id="cycle-score-bar">
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+        <span class="score-segment score-segment--empty"></span>
+      </div>
+      <p class="cycle-score-count" id="cycle-score-count">— de 8 sinais favoráveis</p>
+
+    </section>
+
+    <!-- How to read this -->
+    <details class="how-to-read" id="how-to-read">
+      <summary class="how-to-read-summary">Como ler este painel</summary>
+      <div class="how-to-read-content">
+        <p><strong>O que esta ferramenta mostra</strong><br>
+        Oito métricas on-chain que descrevem em que ponto do ciclo de mercado de longo prazo o Bitcoin se encontra.
+        Dados on-chain leem a blockchain do Bitcoin diretamente — refletem o que os holders estão
+        realmente fazendo com suas moedas, não o que dizem que vão fazer.</p>
+
+        <p><strong>Como ler as zonas</strong><br>
+        Cada métrica tem um badge de zona colorido. A cor indica o sinal rapidamente:</p>
+        <ul>
+          <li><span class="how-to-zone how-to-zone--green">●</span> <strong>Verde</strong> — território historicamente forte de acumulação</li>
+          <li><span class="how-to-zone how-to-zone--blue">●</span> <strong>Azul</strong> — zona favorável para entrada de longo prazo</li>
+          <li><span class="how-to-zone how-to-zone--neutral">●</span> <strong>Cinza</strong> — neutro, sem sinal extremo</li>
+          <li><span class="how-to-zone how-to-zone--amber">●</span> <strong>Âmbar</strong> — atenção, mercado esquentando</li>
+          <li><span class="how-to-zone how-to-zone--red">●</span> <strong>Vermelho</strong> — historicamente uma zona de distribuição / topo de ciclo</li>
+        </ul>
+
+        <p><strong>As oito métricas</strong><br>
+        <strong>Preço Realizado</strong> — o preço médio que todos os holders de Bitcoin pagaram por suas moedas.
+        Quando o preço de mercado cai abaixo disso, a maioria dos holders está com prejuízo — historicamente um sinal raro e significativo.<br><br>
+        <strong>MVRV Z-Score</strong> — mede, em termos estatísticos, o quanto o mercado está acima ou abaixo do preço médio.
+        Perto de zero = historicamente subvalorizado. Acima de 6 = historicamente sobrevalorizado.<br><br>
+        <strong>Variação Líquida de Posição (LTH)</strong> — quanto Bitcoin entrou em carteiras de Long-Term Holder
+        (moedas paradas há 155+ dias) nos últimos 30 dias. Positivo = capital paciente acumulando.<br><br>
+        <strong>Oferta em Cold Storage</strong> — Bitcoin em posse de entidades com pouco ou nenhum histórico de movimentação.
+        Em alta = mais BTC saindo da circulação ativa. Um sinal altista para a escassez de oferta.<br><br>
+        <strong>Puell Multiple</strong> — compara a receita dos mineradores hoje com a média anual.
+        Abaixo de 1,0 = mineradores sob pressão, historicamente favorável. Acima de 3,0 = mineradores em euforia, historicamente um sinal de topo.<br><br>
+        <strong>Saldo das Baleias</strong> — número de endereços com mais de 10.000 BTC.
+        Número em alta = os maiores holders acumulando. Em queda = distribuindo.<br><br>
+        <strong>SOPR</strong> — Spent Output Profit Ratio. Mede se as moedas movimentadas hoje estão no lucro ou no prejuízo.
+        Abaixo de 1,0 = moedas sendo movimentadas com prejuízo (capitulação). Acima de 1,0 = moedas sendo movimentadas com lucro (distribuição).<br><br>
+        <strong>NUPL</strong> — Net Unrealized Profit/Loss como fração do market cap.
+        Negativo = maioria dos holders no prejuízo (historicamente um forte sinal de acumulação). Acima de 0,75 = euforia próxima do pico.</p>
+
+        <p><strong>Leitura do Ciclo</strong><br>
+        A barra no topo combina os oito sinais em uma leitura agregada.
+        É uma ferramenta descritiva — mostra onde o mercado historicamente esteve,
+        não para onde está indo. Padrões passados não garantem resultados futuros.</p>
+
+        <p><strong>Passe o mouse sobre qualquer métrica</strong> para uma explicação detalhada. Clique no título da métrica para
+        abrir o gráfico de referência.</p>
+      </div>
+    </details>
+
+    <!-- Metrics -->
+    <section class="metrics-section" aria-label="Métricas on-chain">
+
+      <!-- Error state — hidden until JS triggers it -->
+      <p id="data-error" class="data-error" role="alert" hidden></p>
+
+      <!-- Block 1 — Realized Price -->
+      <div class="metric-block reveal" aria-labelledby="rp-label">
+        <p class="metric-label" id="rp-label">
+          <a class="metric-title-link" href="https://www.bitcoinmagazinepro.com/charts/realized-price/" target="_blank" rel="noopener">Preço Realizado</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="rp-value" aria-label="Preço Realizado" tabindex="0">—</span>
+          <span class="metric-spot-label">
+            BTC <span id="btc-price-display" tabindex="0">—</span>
+          </span>
+        </div>
+
+        <p class="metric-premium" id="rp-premium" aria-label="Prêmio ou desconto em relação ao Preço Realizado" tabindex="0">—</p>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="rp-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="rp-interpretation"></p>
+      </div>
+
+      <!-- Block 2 — MVRV Z-Score -->
+      <div class="metric-block reveal" aria-labelledby="mvrv-label">
+        <p class="metric-label" id="mvrv-label">
+          <a class="metric-title-link" href="https://www.bitcoinmagazinepro.com/charts/mvrv-zscore/" target="_blank" rel="noopener">MVRV Z-Score</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="mvrv-value" aria-label="MVRV Z-Score" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="mvrv-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="mvrv-interpretation"></p>
+      </div>
+
+      <!-- Block 3 — LTH Net Position Change -->
+      <div class="metric-block reveal" aria-labelledby="lth-label">
+        <p class="metric-label" id="lth-label">
+          <a class="metric-title-link" href="https://chartinspect.com/charts/lth-net-position" target="_blank" rel="noopener">Variação Líquida de Posição (LTH)</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="lth-value" aria-label="Variação Líquida de Posição LTH em 30 dias" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="lth-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="lth-interpretation"></p>
+      </div>
+
+      <!-- Block 4 — Supply in Cold Storage -->
+      <div class="metric-block reveal" id="cold-storage-block" aria-labelledby="cold-storage-label">
+        <p class="metric-label" id="cold-storage-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/long-term-holder-supply/"
+             target="_blank" rel="noopener">Oferta em Cold Storage</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="cold-storage-value"
+                aria-label="Oferta em Cold Storage" tabindex="0">—</span>
+          <span class="metric-secondary" id="cold-storage-change" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="cold-storage-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="cold-storage-interpretation"></p>
+      </div>
+
+      <!-- Block 5 — Puell Multiple -->
+      <div class="metric-block reveal" id="puell-block" aria-labelledby="puell-label">
+        <p class="metric-label" id="puell-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/puell-multiple/"
+             target="_blank" rel="noopener">Puell Multiple</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="puell-value"
+                aria-label="Puell Multiple" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="puell-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="puell-interpretation"></p>
+      </div>
+
+      <!-- Block 6 — Whale Balance -->
+      <div class="metric-block reveal" id="whale-block" aria-labelledby="whale-label">
+        <p class="metric-label" id="whale-label">
+          <a class="metric-title-link"
+             href="https://charts.bgeometrics.com/distribution_coin_humpback_dark.html"
+             target="_blank" rel="noopener">Saldo das Baleias (&gt;10k BTC)</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="whale-value"
+                aria-label="Saldo das Baleias" tabindex="0">—</span>
+          <span class="metric-secondary" id="whale-change" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="whale-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="whale-interpretation"></p>
+      </div>
+
+      <!-- Block 7 — SOPR -->
+      <div class="metric-block reveal" id="sopr-block" aria-labelledby="sopr-label">
+        <p class="metric-label" id="sopr-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/sopr/"
+             target="_blank" rel="noopener">SOPR</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="sopr-value"
+                aria-label="SOPR" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="sopr-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="sopr-interpretation"></p>
+      </div>
+
+      <!-- Block 8 — NUPL -->
+      <div class="metric-block reveal" id="nupl-block" aria-labelledby="nupl-label">
+        <p class="metric-label" id="nupl-label">
+          <a class="metric-title-link"
+             href="https://www.bitcoinmagazinepro.com/charts/nupl/"
+             target="_blank" rel="noopener">NUPL</a>
+        </p>
+
+        <div class="metric-value-row">
+          <span class="metric-value" id="nupl-value"
+                aria-label="NUPL" tabindex="0">—</span>
+        </div>
+
+        <div class="metric-zone-row">
+          <span class="zone-badge zone-badge--neutral" id="nupl-zone-badge" tabindex="0">—</span>
+        </div>
+
+        <p class="metric-interpretation" id="nupl-interpretation"></p>
+      </div>
+
+      <!-- Data freshness -->
+      <div class="data-freshness" aria-label="Atualização dos dados">
+        <span id="freshness-onchain">Dados on-chain atualizados diariamente · Última atualização: <span id="last-update">—</span></span>
+        <span class="freshness-separator">&nbsp;·&nbsp;</span>
+        <span id="freshness-price">Preço do BTC: <span class="freshness-live">ao vivo</span></span>
+      </div>
+
     </section>
 
   </main>
@@ -127,8 +392,12 @@
         </li>
       </ul>
     </div>
+    <p class="footer-disclaimer">Dados on-chain são descritivos, não preditivos. Padrões passados não garantem resultados futuros.</p>
   </footer>
 
+  <script src="../i18n.js"></script>
+  <script src="../tooltips.js"></script>
+  <script src="../cycleScore.js"></script>
   <script src="../main.js" defer></script>
 </body>
 </html>
